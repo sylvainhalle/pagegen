@@ -42,11 +42,19 @@ public class VerticalFlowLayout extends FlowLayout
 		for (Box b : children)
 		{
 			parent.addChild(b);
-			b.shiftX(x);
+			boolean toss = m_injectAlignementFault.pick();
+			float x_shift = 0;
+			if (toss)
+			{
+				m_misalignmentCount++;
+				x_shift = m_shiftPicker.pick();
+				b.alter();
+			}
+			b.shiftX(x + x_shift);
 			b.shiftY(y);
 			bounding_h = Math.max(bounding_h, y + b.getHeight());
 			y += b.getHeight() + m_spacing;
-			bounding_w = Math.max(bounding_w, x + b.getWidth());
+			bounding_w = Math.max(bounding_w, x + b.getWidth() + x_shift);
 			max_x = Math.max(max_x, b.getWidth());
 			n++;
 			const_align.add(b);

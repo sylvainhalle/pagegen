@@ -42,6 +42,11 @@ public class Box
 	 */
 	protected float m_padding;
 	
+	/**
+	 * A tag that can be associated to elements to signal they have been "altered"
+	 */
+	protected boolean m_altered = false;
+	
 	/*@ non_null @*/ protected final List<Box> m_children;
 	
 	/**
@@ -61,6 +66,23 @@ public class Box
 		m_height = h;
 		m_children = new ArrayList<Box>();
 		m_padding = 0;
+	}
+	
+	/**
+	 * Marks a box as being "altered"
+	 */
+	public void alter()
+	{
+		m_altered = true;
+	}
+	
+	/**
+	 * Checks if a box is "altered"
+	 * @return <tt>true</tt> if the box is altered, <tt>false</tt> otherwise
+	 */
+	public boolean isAltered()
+	{
+		return m_altered;
 	}
 	
 	/**

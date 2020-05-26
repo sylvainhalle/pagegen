@@ -42,12 +42,19 @@ public class HorizontalFlowLayout extends FlowLayout
 		for (Box b : children)
 		{
 			parent.addChild(b);
+			boolean toss = m_injectAlignementFault.pick();
+			float y_shift = 0;
+			if (toss)
+			{
+				m_misalignmentCount++;
+				y_shift = m_shiftPicker.pick();
+				b.alter();
+			}
 			b.shiftX(x);
-			b.shiftY(y);
+			b.shiftY(y + y_shift);
 			bounding_w = Math.max(bounding_w, x + b.getWidth());
 			x += b.getWidth() + m_spacing;
-			bounding_h = Math.max(bounding_h, y + b.getHeight());
-			max_y = Math.max(max_y, b.getHeight());
+			bounding_h = Math.max(bounding_h, y + b.getHeight() + y_shift);
 			n++;
 			const_align.add(b);
 			if (max_elements > 0 && n == max_elements)

@@ -21,6 +21,11 @@ public class HtmlRenderer extends BoxRenderer
 		ps.println("<html>");
 		ps.println("<head>");
 		ps.println("<style type=\"text/css\">");
+		ps.println(".altered {");
+		ps.println("  background-color: black !important;");
+		ps.println("  border: red dashed 1px;");
+		ps.println("  margin: -1px;");
+		ps.println("}");
 		ps.println(".box {");
 		ps.println("  position: absolute;");
 		ps.println("}");
@@ -42,7 +47,14 @@ public class HtmlRenderer extends BoxRenderer
 	public void toHtml(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ Box b, String indent)
 	{
 		ps.print(indent);
-		ps.print("<div class=\"box\" style=\"left:");
+		String alter_class = "";
+		String title = "";
+		if (b.isAltered())
+		{
+			alter_class = " altered";
+			title = "Altered";
+		}
+		ps.print("<div class=\"box" + alter_class + "\" title=\"" + title + "\" style=\"left:");
 		ps.print(b.getX());
 		ps.print("px;top:");
 		ps.print(b.getY());
@@ -50,7 +62,8 @@ public class HtmlRenderer extends BoxRenderer
 		ps.print(b.getWidth());
 		ps.print("px;height:");
 		ps.print(b.getHeight());
-		ps.print("px;background-color:");
+		ps.print("px;");
+		ps.print("background-color:");
 		ps.print(m_color.pick());
 		ps.println("\">");
 		ps.println("</div>");
