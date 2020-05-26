@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 import ca.uqac.lif.synthia.Picker;
 
-public class HtmlRenderer
+public class HtmlRenderer extends BoxRenderer
 {
 	/*@ non_null @*/ protected Picker<String> m_color;
 	
@@ -14,7 +14,8 @@ public class HtmlRenderer
 		m_color = color;
 	}
 	
-	public void toHtml(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ Box b)
+	@Override
+	public void render(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ Box b)
 	{
 		ps.println("<!DOCTYPE html>");
 		ps.println("<html>");

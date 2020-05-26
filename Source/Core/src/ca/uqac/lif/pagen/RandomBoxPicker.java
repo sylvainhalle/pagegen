@@ -6,7 +6,7 @@ import java.util.List;
 import ca.uqac.lif.synthia.Picker;
 import ca.uqac.lif.synthia.util.Constant;
 
-public class BoxPicker implements Picker<Box>
+public class RandomBoxPicker implements Picker<Box>
 {
 	protected Picker<Integer> m_numChildren;
 
@@ -18,7 +18,7 @@ public class BoxPicker implements Picker<Box>
 
 	protected Picker<LayoutManager> m_layout;
 
-	public BoxPicker(Picker<Integer> children, Picker<Integer> depth, Picker<LayoutManager> layout, Picker<Float> width, Picker<Float> height)
+	public RandomBoxPicker(Picker<Integer> children, Picker<Integer> depth, Picker<LayoutManager> layout, Picker<Float> width, Picker<Float> height)
 	{
 		super();
 		m_numChildren = children;
@@ -51,7 +51,7 @@ public class BoxPicker implements Picker<Box>
 			}
 			else
 			{
-				BoxPicker bp = new BoxPicker(m_numChildren, new Constant<Integer>(depth - 1), m_layout, m_width, m_height);
+				RandomBoxPicker bp = new RandomBoxPicker(m_numChildren, new Constant<Integer>(depth - 1), m_layout, m_width, m_height);
 				b = bp.pick();
 			}
 			children.add(b);

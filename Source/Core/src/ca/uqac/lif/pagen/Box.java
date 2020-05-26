@@ -6,27 +6,84 @@ import java.util.List;
 
 public class Box 
 {
+	/**
+	 * A counter to give IDs to boxes
+	 */
+	private static int s_idCount = 0;
+	
+	/**
+	 * A unique ID for this box
+	 */
+	protected int m_id;
+	
+	/**
+	 * The <i>x</i> position of the top-left corner of this box
+	 */
 	protected float m_x;
 	
+	/**
+	 * The <i>y</i> position of the top-left corner of this box
+	 */
 	protected float m_y;
 	
+	/**
+	 * The width of this box
+	 */
 	protected float m_width;
 	
+	/**
+	 * The height of this box
+	 */
 	protected float m_height;
 	
+	/**
+	 * The padding to be applied to the inside of this box. Padding applies to
+	 * all sides.
+	 */
 	protected float m_padding;
 	
 	/*@ non_null @*/ protected final List<Box> m_children;
 	
+	/**
+	 * Creates a new box with given position and dimensions.
+	 * @param x The <i>x</i> position of the top-left corner of this box
+	 * @param y The <i>y</i> position of the top-left corner of this box
+	 * @param w The width of this box
+	 * @param h The height of this box
+	 */
 	public Box(float x, float y, float w, float h)
 	{
 		super();
+		m_id = s_idCount++;
 		m_x = x;
 		m_y = y;
 		m_width = w;
 		m_height = h;
 		m_children = new ArrayList<Box>();
 		m_padding = 0;
+	}
+	
+	/**
+	 * Gets the unique ID given to this box
+	 * @return The ID
+	 */
+	public int getId()
+	{
+		return m_id;
+	}
+	
+	/**
+	 * Gets the size of this tree.
+	 * @return The total number of nodes in the tree
+	 */
+	public int getSize()
+	{
+		int count = 1;
+		for (Box b_c : m_children)
+		{
+			count += b_c.getSize();
+		}
+		return count;
 	}
 	
 	public void setPadding(float p)
@@ -145,11 +202,27 @@ public class Box
 	
 	protected void toString(StringBuilder out, String indent)
 	{
-		out.append(indent).append("x: ").append(m_x).append(", y: ").append(m_y).append(", w: ").append(m_width).append(", h: ").append(m_height).append("\n");
+		out.append(indent).append("id: ").append(m_id).append(", x: ").append(m_x).append(", y: ").append(m_y).append(", w: ").append(m_width).append(", h: ").append(m_height).append("\n");
 		indent += " ";
 		for (Box b : m_children)
 		{
 			b.toString(out, indent);
 		}
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return m_id;
+	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		if (o == null || !(o instanceof Box))
+		{
+			return false;
+		}
+		return m_id == ((Box) o).getId();
 	}
 }
