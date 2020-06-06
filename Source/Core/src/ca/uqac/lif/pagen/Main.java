@@ -9,7 +9,6 @@ import ca.uqac.lif.pagen.CliParser.Argument;
 import ca.uqac.lif.pagen.CliParser.ArgumentMap;
 import ca.uqac.lif.synthia.Picker;
 import ca.uqac.lif.synthia.random.RandomIntervalFloat;
-import ca.uqac.lif.synthia.util.Constant;
 import ca.uqac.lif.synthia.util.ElementPicker;
 import ca.uqac.lif.synthia.random.PoissonInteger;
 import ca.uqac.lif.synthia.random.RandomBoolean;
@@ -34,7 +33,7 @@ public class Main
 		ArgumentMap arg_map = parser.parse(args);
 		if (arg_map == null || arg_map.containsKey("help"))
 		{
-			parser.printHelp("Random DOM tree generator", System.out);
+			parser.printHelp("Random DOM tree generator\n(C) 2020 Laboratoire d'informatique formelle\nUniversité du Québec à Chicoutimi, Canada\nhttps://liflab.ca\n\nUsage java -jar pagen.jar [options]", System.out);
 			System.exit(1);
 		}
 		if (arg_map.hasOption("min-depth"))
@@ -73,7 +72,8 @@ public class Main
 		RandomBoolean misalignment = new RandomBoolean(p_misalignment);
 		RandomInteger misalignment_shift = new RandomInteger(2, 10);
 		ElementPicker<LayoutManager> layout = new ElementPicker<LayoutManager>(float_source);
-		Picker<String> color = new ColorPicker(new RandomInteger(128, 255));
+		RandomInteger rand_color = new RandomInteger(128,255);
+		Picker<String> color = new ColorPicker(rand_color);
 		if (seed >= 0)
 		{
 			depth.setSeed(seed);
@@ -85,6 +85,7 @@ public class Main
 			column_size.setSeed(seed + 6);
 			misalignment_shift.setSeed(seed + 7);
 			misalignment.setSeed(seed + 8);
+			rand_color.setSeed(seed + 9);
 		}
 
 		// Setup box picker
@@ -99,7 +100,8 @@ public class Main
 		layout.add(vfl_1, 0.4);
 		RandomBoxPicker box_picker = new RandomBoxPicker(degree, depth, layout, width, height);
 		Box b = box_picker.pick();
-
+		
+		// Render
 		BoxRenderer renderer = null;
 		if (type.compareToIgnoreCase("html") == 0)
 		{
@@ -117,9 +119,11 @@ public class Main
 		{
 			renderer = new DotRenderer();
 		}
+		renderer.render(System.out, b);
 		if (!quiet)
 		{
 			System.err.println("Tree size:                " + b.getSize());
+			System.err.println("Tree depth:               " + b.getDepth());
 			System.err.println("Horizontal misalignments: " + (hfl_1.getMisalignmentCount() + hfl_2.getMisalignmentCount()));
 			System.err.println("Vertical misalignments:   " + (vfl_1.getMisalignmentCount()));
 		}
@@ -135,14 +139,14 @@ public class Main
 	protected static CliParser setupParser()
 	{
 		CliParser parser = new CliParser();
-		parser.addArgument(new Argument().withLongName("type").withShortName("t").withDescription("Output file of type t (html, dot, opl)"));
-		parser.addArgument(new Argument().withLongName("seed").withShortName("s").withArgument("x").withDescription("Initialize RNG with seed s"));
-		parser.addArgument(new Argument().withLongName("misalign").withShortName("m").withArgument("x").withDescription("Set misalignment probability to p (in [0,1])"));
+		parser.addArgument(new Argument().withLongName("type").withShortName("t").withDescription("\tOutput file of type t (html, dot, opl)"));
+		parser.addArgument(new Argument().withLongName("seed").withShortName("s").withArgument("x").withDescription("\tInitialize RNG with seed s"));
+		parser.addArgument(new Argument().withLongName("misalign").withShortName("m").withArgument("x").withDescription("\tSet misalignment probability to p (in [0,1])"));
 		parser.addArgument(new Argument().withLongName("min-depth").withShortName("d").withArgument("x").withDescription("Set minimum document depth to x"));
 		parser.addArgument(new Argument().withLongName("max-depth").withShortName("D").withArgument("x").withDescription("Set maximum document depth to x"));
-		parser.addArgument(new Argument().withLongName("degree").withShortName("g").withArgument("x").withDescription("Set degree to Poisson distribution with parameter x"));
-		parser.addArgument(new Argument().withLongName("quiet").withShortName("q").withDescription("Don't print generation stats to stderr"));
-		parser.addArgument(new Argument().withLongName("help").withShortName("?").withDescription("Show command line usage"));
+		parser.addArgument(new Argument().withLongName("degree").withShortName("g").withArgument("x").withDescription("\tSet degree to Poisson distribution with parameter x"));
+		parser.addArgument(new Argument().withLongName("quiet").withShortName("q").withDescription("\tDon't print generation stats to stderr"));
+		parser.addArgument(new Argument().withLongName("help").withShortName("?").withDescription("\tShow command line usage"));
 		return parser;
 	}
 

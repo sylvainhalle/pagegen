@@ -196,6 +196,20 @@ public class Box
 		m_height = h;
 	}
 	
+	/**
+	 * Gets the maximum depth of the tree
+	 * @return The depth
+	 */
+	public int getDepth()
+	{
+		int max_depth = 0;
+		for (Box b : m_children)
+		{
+			max_depth = Math.max(max_depth, b.getDepth());
+		}
+		return max_depth + 1;
+	}
+	
 	public List<Box> getChildren()
 	{
 		return m_children;

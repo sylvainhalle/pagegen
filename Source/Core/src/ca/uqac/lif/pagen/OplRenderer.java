@@ -36,6 +36,11 @@ public class OplRenderer extends BoxRenderer
 		Map<Integer,Box> boxes = b.flatten();
 		int size = boxes.size();
 		int top_id = b.getId();
+		ps.println("/****************************************");
+		ps.println(" * OPL 12.9.0.0 Model");
+		ps.println(" * Tree size:             " + b.getSize());
+		ps.println(" * Tree depth:            " + b.getDepth());
+		ps.println("****************************************/");
 		ps.println("int nb_rectangles=" + size + ";");
 		ps.print("{int} rectangles_id={");
 		for (int i = 0; i < size; i++)

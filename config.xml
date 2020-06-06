@@ -23,19 +23,23 @@
        script's default values -->
 
   <!-- The project's name -->
-  <!-- <name>AntRun</name> -->
+  <name>Random Page Generator</name>
   
   <!-- The project's author. Currently this only
   shows up in the footer of the Javadoc documentation. -->
-  <!-- <author>Marty McFly</author> -->
+  <author>Sylvain Hallé</author>
   
   <!-- The project's main class -->
-  <!-- <mainclass>my.package.MainClass</mainclass> -->
+  <mainclass>ca.uqac.lif.pagen.Main</mainclass>
   
   <test>
     <!-- The filename pattern to recognize test files -->
-    <!-- <filenamepattern>**/*Test.java</filenamepattern> -->
+    <filenamepattern>**/*Test.java</filenamepattern>
   </test>
+  
+  <jar>
+    <filename>pagen.jar</filename>
+  </jar>
   
   <!--
     Write JAR dependencies here.
@@ -46,8 +50,8 @@
       whether the detection/download of dependencies works. Delete this in
       a real-world project.
       -->
-      <name>Test Dep</name>
-      <classname>ca.uqac.lif.NonExistentClass</classname>
+      <name>Synthia</name>
+      <classname>ca.uqac.lif.synthia.Picker</classname>
       <files>
         <zip>https://github.com/liflab/synthia/releases/download/v0.2/synthia-0.2.zip</zip>
       </files>
