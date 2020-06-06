@@ -58,6 +58,16 @@ This will produce a file called `pagen.jar` in the folder. This
 file is runnable and stand-alone, or can be used as a library, so it can be
 moved around to the location of your choice.
 
+### Dependencies
+
+This project depends on:
+
+- [Synthia](https://github.com/liflab/synthia), a data structure generator
+
+Dependencies can be individually downloaded by typing:
+
+    ant download-deps
+
 About the author
 ----------------
 
