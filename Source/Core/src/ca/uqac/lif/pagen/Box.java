@@ -2,7 +2,9 @@ package ca.uqac.lif.pagen;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Box 
 {
@@ -229,6 +231,22 @@ public class Box
 		for (Box b : m_children)
 		{
 			b.toString(out, indent);
+		}
+	}
+	
+	public Map<Integer,Box> flatten()
+	{
+		Map<Integer,Box> map = new HashMap<Integer,Box>();
+		flatten(map);
+		return map;
+	}
+	
+	protected void flatten(Map<Integer,Box> map)
+	{
+		map.put(m_id, this);
+		for (Box b : m_children)
+		{
+			b.flatten(map);
 		}
 	}
 	
