@@ -111,10 +111,6 @@ public class Main
 		{
 			renderer = new OplRenderer(hfl_1.getConstraints(), hfl_2.getConstraints(), vfl_1.getConstraints());
 		}
-		else if (type.compareToIgnoreCase("opl") == 0)
-		{
-			renderer = new OplRenderer(hfl_1.getConstraints(), hfl_2.getConstraints(), vfl_1.getConstraints());
-		}
 		else if (type.compareToIgnoreCase("dot") == 0)
 		{
 			renderer = new DotRenderer();
@@ -139,7 +135,7 @@ public class Main
 	protected static CliParser setupParser()
 	{
 		CliParser parser = new CliParser();
-		parser.addArgument(new Argument().withLongName("type").withShortName("t").withDescription("\tOutput file of type t (html, dot, opl)"));
+		parser.addArgument(new Argument().withLongName("type").withShortName("t").withArgument("x").withDescription("\tOutput file of type x (html, dot, opl)"));
 		parser.addArgument(new Argument().withLongName("seed").withShortName("s").withArgument("x").withDescription("\tInitialize RNG with seed s"));
 		parser.addArgument(new Argument().withLongName("misalign").withShortName("m").withArgument("x").withDescription("\tSet misalignment probability to p (in [0,1])"));
 		parser.addArgument(new Argument().withLongName("min-depth").withShortName("d").withArgument("x").withDescription("Set minimum document depth to x"));
