@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
 import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
 import ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
@@ -137,6 +138,10 @@ public class OplRenderer extends BoxRenderer
 		{
 			renderDisjoint(ps, (Disjoint) c);
 		}
+		else if (c instanceof Contained)
+		{
+			renderContained(ps, (Contained) c);
+		}
 	}
 	
 	protected static void renderVerticallyAligned(PrintStream ps, VerticallyAligned c)
@@ -191,6 +196,21 @@ public class OplRenderer extends BoxRenderer
 	
 	protected static void renderDisjoint(PrintStream ps, Disjoint c)
 	{
-		
+		int b1_id = c.m_box1.m_id;
+		int b2_id = c.m_box2.m_id;
+		ps.print("top[" + b1_id + "]+Height[" + b1_id + "]<= top[" + b2_id + "] || ");
+		ps.print("top[" + b2_id + "]+Height[" + b2_id + "]<= top[" + b1_id + "] || ");
+		ps.print("left[" + b1_id + "]+Width[" + b1_id + "]<= left[" + b2_id + "] || ");
+		ps.print("left[" + b2_id + "]+Width[" + b2_id + "]<= left[" + b1_id + "];");
+	}
+	
+	protected static void renderContained(PrintStream ps, Contained c)
+	{
+		int b1_id = c.m_box1.m_id;
+		int b2_id = c.m_box2.m_id;
+		ps.print("top[" + b1_id + "]<=top[" + b2_id + "];");
+		ps.print("top[" + b1_id + "]+Height[" + b1_id + "]>= top[" + b2_id + "]+Height[" + b2_id + "];");
+		ps.print("left[" + b1_id + "]<=left[" + b2_id + "];");
+		ps.print("left[" + b1_id + "]+Width[" + b1_id + "]>= left[" + b2_id + "]+Width[" + b2_id + "];");
 	}
 }
