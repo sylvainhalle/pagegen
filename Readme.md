@@ -12,7 +12,7 @@ The document can be exported to various formats:
 - As a [DOT](https://graphviz.org) file that Graphviz can display as a tree
 - As an OPL input file for the IBM [CPLEX](https://www.ibm.com/products/ilog-cplex-optimization-studio) constraint solver
 
-Many parameters of the generator can be configured: minimum/maximum depth, node degree. In addition, some elements can be purposefully **misaligned**; this can be used e.g. to test software that detect or correct such misalignments (such as [Cornipickle](https://github.com/liflab/cornipickle)). In the picture above, misaligned elements are represented in black with a dashed red border.
+Many parameters of the generator can be configured: minimum/maximum depth, node degree. In addition, some elements can be purposefully **misaligned**, made to **overlap** or to **overflow** their parent container; this can be used e.g. to test software that detect or correct such misalignments (such as [Cornipickle](https://github.com/liflab/cornipickle)). In the picture above, misaligned elements are represented in black with a dashed red border.
 
 You can use a [precompiled release](releases) or compile the project yourself (see below).
 
@@ -24,12 +24,15 @@ Usage java -jar pagen.jar [options]
 
 -q --quiet 		Don't print generation stats to stderr
 -s --seed x		Initialize RNG with seed s
--t --type 		Output file of type t (html, dot, opl)
+-t --type x		Output file of type x (html, dot, opl)
 -d --min-depth x	Set minimum document depth to x
 -D --max-depth x	Set maximum document depth to x
+-w --overflow x		Set overflow probability to p (in [0,1])
 -g --degree x		Set degree to Poisson distribution with parameter x
+-l --overlap x		Set overlap probability to p (in [0,1])
 -m --misalign x		Set misalignment probability to p (in [0,1])
 -? --help 		Show command line usage
+-o --output file	Output to file
 ```
 
 Compiling and Installing
