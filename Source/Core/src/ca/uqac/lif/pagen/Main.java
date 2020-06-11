@@ -122,7 +122,11 @@ public class Main
 			column_size.setSeed(seed + 6);
 			misalignment_shift.setSeed(seed + 7);
 			misalignment.setSeed(seed + 8);
-			rand_color.setSeed(seed + 9);
+			overlap_shift.setSeed(seed + 9);
+			overlap.setSeed(seed + 10);
+			overflow_shift.setSeed(seed + 11);
+			overflow.setSeed(seed + 12);
+			rand_color.setSeed(seed + 13);
 		}
 
 		// Setup box picker
