@@ -43,9 +43,10 @@ public class Main
 		int min_depth = 4;
 		int max_depth = 5;
 		float p_degree = 2.2f;
-		float p_misalignment = 0.1f;
+		float p_misalignment = 0.1f, p_overlap = 0.1f, p_overflow = 0.1f;
 		String type = "html";
 		boolean quiet = false;
+		PrintStream out = System.out;
 
 		// Override by CLI parameters
 		CliParser parser = setupParser();
@@ -75,9 +76,22 @@ public class Main
 		{
 			p_misalignment = Float.parseFloat(arg_map.get("misalign").trim());
 		}
+		if (arg_map.hasOption("overlap"))
+		{
+			p_overlap = Float.parseFloat(arg_map.get("overlap").trim());
+		}
+		if (arg_map.hasOption("overflow"))
+		{
+			p_overflow = Float.parseFloat(arg_map.get("overflow").trim());
+		}
 		if (arg_map.hasOption("type"))
 		{
 			type = arg_map.get("type");
+		}
+		if (arg_map.hasOption("output"))
+		{
+			String filename = arg_map.get("output");
+			out = new PrintStream(new FileOutputStream(new File(filename)));
 		}
 
 		// Initialize RNGs and seed
@@ -90,6 +104,10 @@ public class Main
 		RandomInteger column_size = new RandomInteger(0, 10);
 		RandomBoolean misalignment = new RandomBoolean(p_misalignment);
 		RandomInteger misalignment_shift = new RandomInteger(2, 10);
+		RandomBoolean overlap = new RandomBoolean(p_overlap);
+		RandomInteger overlap_shift = new RandomInteger(2, 10);
+		RandomBoolean overflow = new RandomBoolean(p_overflow);
+		RandomInteger overflow_shift = new RandomInteger(2, 10);
 		ElementPicker<LayoutManager> layout = new ElementPicker<LayoutManager>(float_source);
 		RandomInteger rand_color = new RandomInteger(128,255);
 		Picker<String> color = new ColorPicker(rand_color);
@@ -110,10 +128,16 @@ public class Main
 		// Setup box picker
 		HorizontalFlowLayout hfl_1 = new HorizontalFlowLayout();
 		hfl_1.setAlignmentFault(misalignment, misalignment_shift);
+		hfl_1.setOverlapFault(overlap, overlap_shift);
+		hfl_1.setOverflowFault(overflow, overflow_shift);
 		HorizontalFlowLayout hfl_2 = new HorizontalFlowLayout(row_size);
 		hfl_2.setAlignmentFault(misalignment, misalignment_shift);
+		hfl_2.setOverlapFault(overlap, overlap_shift);
+		hfl_2.setOverflowFault(overflow, overflow_shift);
 		VerticalFlowLayout vfl_1 = new VerticalFlowLayout(column_size);
 		vfl_1.setAlignmentFault(misalignment, misalignment_shift);
+		vfl_1.setOverlapFault(overlap, overlap_shift);
+		vfl_1.setOverflowFault(overflow, overflow_shift);
 		layout.add(hfl_1, 0.2);
 		layout.add(hfl_2, 0.4);
 		layout.add(vfl_1, 0.4);
@@ -134,14 +158,17 @@ public class Main
 		{
 			renderer = new DotRenderer();
 		}
-		renderer.render(System.out, b);
+		renderer.render(out, b);
 		if (!quiet)
 		{
 			System.err.println("Tree size:                " + b.getSize());
 			System.err.println("Tree depth:               " + b.getDepth());
 			System.err.println("Horizontal misalignments: " + (hfl_1.getMisalignmentCount() + hfl_2.getMisalignmentCount()));
 			System.err.println("Vertical misalignments:   " + (vfl_1.getMisalignmentCount()));
+			System.err.println("Overlappings:             " + (vfl_1.getOverlapCount()));
+			System.err.println("Overflows:                " + (vfl_1.getOverflowCount()));
 		}
+		out.close();
 	}
 
 	public static void renderToFile(Box b, BoxRenderer r, String filename) throws FileNotFoundException
@@ -157,11 +184,14 @@ public class Main
 		parser.addArgument(new Argument().withLongName("type").withShortName("t").withArgument("x").withDescription("\tOutput file of type x (html, dot, opl)"));
 		parser.addArgument(new Argument().withLongName("seed").withShortName("s").withArgument("x").withDescription("\tInitialize RNG with seed s"));
 		parser.addArgument(new Argument().withLongName("misalign").withShortName("m").withArgument("x").withDescription("\tSet misalignment probability to p (in [0,1])"));
+		parser.addArgument(new Argument().withLongName("overlap").withShortName("l").withArgument("x").withDescription("\tSet overlap probability to p (in [0,1])"));
+		parser.addArgument(new Argument().withLongName("overflow").withShortName("w").withArgument("x").withDescription("\tSet overflow probability to p (in [0,1])"));
 		parser.addArgument(new Argument().withLongName("min-depth").withShortName("d").withArgument("x").withDescription("Set minimum document depth to x"));
 		parser.addArgument(new Argument().withLongName("max-depth").withShortName("D").withArgument("x").withDescription("Set maximum document depth to x"));
 		parser.addArgument(new Argument().withLongName("degree").withShortName("g").withArgument("x").withDescription("\tSet degree to Poisson distribution with parameter x"));
 		parser.addArgument(new Argument().withLongName("quiet").withShortName("q").withDescription("\tDon't print generation stats to stderr"));
 		parser.addArgument(new Argument().withLongName("help").withShortName("?").withDescription("\tShow command line usage"));
+		parser.addArgument(new Argument().withLongName("output").withShortName("o").withArgument("file").withDescription("Output to file"));
 		return parser;
 	}
 

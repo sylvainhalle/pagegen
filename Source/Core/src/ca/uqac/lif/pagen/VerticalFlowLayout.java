@@ -56,8 +56,9 @@ public class VerticalFlowLayout extends FlowLayout
 		float bounding_w = 0, bounding_h = 0;
 		int n = 0;
 		LayoutConstraint.HorizontallyAligned const_align = new LayoutConstraint.HorizontallyAligned();
-		for (Box b : children)
+		for (int i = 0; i < children.size(); i++)
 		{
+			Box b = children.get(i);
 			parent.addChild(b);
 			boolean toss = m_injectAlignementFault.pick();
 			float x_shift = 0;
@@ -75,6 +76,18 @@ public class VerticalFlowLayout extends FlowLayout
 			max_x = Math.max(max_x, b.getWidth());
 			n++;
 			const_align.add(b);
+			if (i < children.size() - 1)
+			{
+				boolean overlap_toss = m_injectOverlapFault.pick();
+				float y_expand = 0;
+				if (overlap_toss)
+				{
+					m_overlapCount++;
+					y_expand = m_overlapPicker.pick();
+					b.setHeight(b.getHeight() + y_expand + m_spacing);
+					b.alter();
+				}
+			}
 			if (max_elements > 0 && n == max_elements)
 			{
 				n = 0;
@@ -91,6 +104,17 @@ public class VerticalFlowLayout extends FlowLayout
 		if (const_align.isValid())
 		{
 			m_constraints.add(const_align);
+		}
+		if (!children.isEmpty())
+		{
+			Box first = children.get(0);
+			if (!first.isAltered() && m_injectOverflowFault.pick())
+			{
+				m_overflowCount++;
+				float amount = m_overflowPicker.pick();
+				first.shiftY(-amount);
+				first.alter();
+			}
 		}
 		parent.setWidth(bounding_w + p_padding);
 		parent.setHeight(bounding_h + p_padding);

@@ -47,9 +47,39 @@ public abstract class FlowLayout implements LayoutManager
 	protected Picker<Integer> m_shiftPicker = new Constant<Integer>(0);
 	
 	/**
+	 * A coin toss deciding if an element should be overlapped on purpose
+	 */
+	protected Picker<Boolean> m_injectOverlapFault = new Constant<Boolean>(false);
+	
+	/**
+	 * A picker deciding by how much to overlap an element
+	 */
+	protected Picker<Integer> m_overlapPicker = new Constant<Integer>(0);
+	
+	/**
+	 * A coin toss deciding if an element should be overflowed on purpose
+	 */
+	protected Picker<Boolean> m_injectOverflowFault = new Constant<Boolean>(false);
+	
+	/**
+	 * A picker deciding by how much to overflow an element
+	 */
+	protected Picker<Integer> m_overflowPicker = new Constant<Integer>(0);
+	
+	/**
 	 * The number of misalignments injected into the pages so far
 	 */
 	protected int m_misalignmentCount = 0;
+	
+	/**
+	 * The number of overlappings injected into the pages so far
+	 */
+	protected int m_overlapCount = 0;
+	
+	/**
+	 * The number of overlappings injected into the pages so far
+	 */
+	protected int m_overflowCount = 0;
 	
 	/**
 	 * The spacing between elements
@@ -83,12 +113,56 @@ public abstract class FlowLayout implements LayoutManager
 	}
 	
 	/**
+	 * Sets a Boolean picker to determine if an overlap fault is to
+	 * be injected.
+	 * @param picker The picker
+	 * @param shift The amount by which to overlap an element to the next one
+	 * in the flow layout
+	 */
+	public void setOverlapFault(Picker<Boolean> picker, Picker<Integer> shift)
+	{
+		m_injectOverlapFault = picker;
+		m_overlapPicker = shift;
+	}
+	
+	/**
+	 * Sets a Boolean picker to determine if an overflow fault is to
+	 * be injected.
+	 * @param picker The picker
+	 * @param shift The amount by which to overflow an element with respect
+	 * to its parent
+	 */
+	public void setOverflowFault(Picker<Boolean> picker, Picker<Integer> shift)
+	{
+		m_injectOverflowFault = picker;
+		m_overflowPicker = shift;
+	}
+	
+	/**
 	 * Gets the number of misalignments injected into the pages so far
 	 * @return The number of misalignments
 	 */
 	public int getMisalignmentCount()
 	{
 		return m_misalignmentCount;
+	}
+	
+	/**
+	 * Gets the number of overlappings injected into the pages so far
+	 * @return The number of overlappings
+	 */
+	public int getOverlapCount()
+	{
+		return m_overlapCount;
+	}
+	
+	/**
+	 * Gets the number of overflows injected into the pages so far
+	 * @return The number of overflows
+	 */
+	public int getOverflowCount()
+	{
+		return m_overflowCount;
 	}
 	
 	@Override

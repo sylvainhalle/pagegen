@@ -56,16 +56,19 @@ public class HorizontalFlowLayout extends FlowLayout
 		float bounding_w = 0, bounding_h = 0;
 		int n = 0;
 		LayoutConstraint.VerticallyAligned const_align = new LayoutConstraint.VerticallyAligned();
-		for (Box b : children)
+		for (int i = 0; i < children.size(); i++)
 		{
+			Box b = children.get(i);
 			parent.addChild(b);
-			boolean toss = m_injectAlignementFault.pick();
+			boolean alignment_toss = m_injectAlignementFault.pick();
 			float y_shift = 0;
-			if (toss)
+			boolean altered = false;
+			if (alignment_toss)
 			{
 				m_misalignmentCount++;
 				y_shift = m_shiftPicker.pick();
 				b.alter();
+				altered = true;
 			}
 			b.shiftX(x);
 			b.shiftY(y + y_shift);
@@ -74,6 +77,19 @@ public class HorizontalFlowLayout extends FlowLayout
 			bounding_h = Math.max(bounding_h, y + b.getHeight() + y_shift);
 			n++;
 			const_align.add(b);
+			if (i < children.size() - 1)
+			{
+				boolean overlap_toss = m_injectOverlapFault.pick();
+				float y_expand = 0;
+				if (!altered && overlap_toss)
+				{
+					m_overlapCount++;
+					y_expand = m_overlapPicker.pick();
+					b.setWidth(b.getWidth() + y_expand + m_spacing);
+					b.alter();
+					altered = true;
+				}
+			}
 			if (max_elements > 0 && n == max_elements)
 			{
 				n = 0;
@@ -93,5 +109,16 @@ public class HorizontalFlowLayout extends FlowLayout
 		}
 		parent.setWidth(bounding_w + p_padding);
 		parent.setHeight(bounding_h + p_padding);
+		if (!children.isEmpty())
+		{
+			Box first = children.get(0);
+			if (!first.isAltered() && m_injectOverflowFault.pick())
+			{
+				m_overflowCount++;
+				float amount = m_overflowPicker.pick();
+				first.shiftX(-amount);
+				first.alter();
+			}
+		}
 	}
 }
