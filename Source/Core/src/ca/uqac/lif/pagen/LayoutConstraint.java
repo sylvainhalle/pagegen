@@ -60,7 +60,7 @@ public abstract class LayoutConstraint
 		@Override
 		protected boolean isValid()
 		{
-			return m_box1 != null && m_box2 != null;
+			return m_box1 != null && m_box2 != null && m_box1.getId() != m_box2.getId();
 		}
 	}
 	
