@@ -201,7 +201,7 @@ public class OplRenderer extends BoxRenderer
 		ps.print("top[" + b1_id + "]+Height[" + b1_id + "]<= top[" + b2_id + "] || ");
 		ps.print("top[" + b2_id + "]+Height[" + b2_id + "]<= top[" + b1_id + "] || ");
 		ps.print("left[" + b1_id + "]+Width[" + b1_id + "]<= left[" + b2_id + "] || ");
-		ps.print("left[" + b2_id + "]+Width[" + b2_id + "]<= left[" + b1_id + "];");
+		ps.print("left[" + b2_id + "]+Width[" + b2_id + "]<= left[" + b1_id + "];\n");
 	}
 	
 	protected static void renderContained(PrintStream ps, Contained c)
@@ -211,6 +211,6 @@ public class OplRenderer extends BoxRenderer
 		ps.print("top[" + b1_id + "]<=top[" + b2_id + "];");
 		ps.print("top[" + b1_id + "]+Height[" + b1_id + "]>= top[" + b2_id + "]+Height[" + b2_id + "];");
 		ps.print("left[" + b1_id + "]<=left[" + b2_id + "];");
-		ps.print("left[" + b1_id + "]+Width[" + b1_id + "]>= left[" + b2_id + "]+Width[" + b2_id + "];");
+		ps.print("left[" + b1_id + "]+Width[" + b1_id + "]>= left[" + b2_id + "]+Width[" + b2_id + "];\n");
 	}
 }

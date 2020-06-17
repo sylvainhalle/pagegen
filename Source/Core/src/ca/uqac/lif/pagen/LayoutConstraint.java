@@ -175,7 +175,7 @@ public abstract class LayoutConstraint
 			List<Box> children = b.getChildren();
 			for (int i = 0; i < children.size(); i++)
 			{
-				for (int j = i; j < children.size(); j++)
+				for (int j = i + 1; j < children.size(); j++)
 				{
 					set.add(new Disjoint(children.get(i), children.get(j)));
 				}
