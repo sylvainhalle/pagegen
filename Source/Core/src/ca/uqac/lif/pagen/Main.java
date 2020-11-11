@@ -45,7 +45,7 @@ public class Main
 		float p_degree = 2.2f;
 		float p_misalignment = 0.1f, p_overlap = 0.1f, p_overflow = 0.1f;
 		String type = "html";
-		boolean quiet = false;
+		boolean quiet = false, flat = false;
 		PrintStream out = System.out;
 
 		// Override by CLI parameters
@@ -53,7 +53,7 @@ public class Main
 		ArgumentMap arg_map = parser.parse(args);
 		if (arg_map == null || arg_map.containsKey("help"))
 		{
-			parser.printHelp("Random DOM tree generator\n(C) 2020 Laboratoire d'informatique formelle\nUniversité du Québec à Chicoutimi, Canada\nhttps://liflab.ca\n\nUsage java -jar pagen.jar [options]", System.out);
+			parser.printHelp("Random DOM tree generator v1.1\n(C) 2020 Laboratoire d'informatique formelle\nUniversité du Québec à Chicoutimi, Canada\nhttps://liflab.ca\n\nUsage java -jar pagen.jar [options]", System.out);
 			System.exit(1);
 		}
 		if (arg_map.hasOption("min-depth"))
@@ -92,6 +92,10 @@ public class Main
 		{
 			String filename = arg_map.get("output");
 			out = new PrintStream(new FileOutputStream(new File(filename)));
+		}
+		if (arg_map.hasOption("flat"))
+		{
+			flat = true;
 		}
 
 		// Initialize RNGs and seed
@@ -152,7 +156,14 @@ public class Main
 		BoxRenderer renderer = null;
 		if (type.compareToIgnoreCase("html") == 0)
 		{
-			renderer = new HtmlRenderer(color);
+			if (flat)
+			{
+				renderer = new HtmlFlatRenderer(color);
+			}
+			else
+			{
+				renderer = new HtmlNestedRenderer(color);
+			}
 		}
 		else if (type.compareToIgnoreCase("opl") == 0)
 		{
@@ -193,6 +204,7 @@ public class Main
 		parser.addArgument(new Argument().withLongName("min-depth").withShortName("d").withArgument("x").withDescription("Set minimum document depth to x"));
 		parser.addArgument(new Argument().withLongName("max-depth").withShortName("D").withArgument("x").withDescription("Set maximum document depth to x"));
 		parser.addArgument(new Argument().withLongName("degree").withShortName("g").withArgument("x").withDescription("\tSet degree to Poisson distribution with parameter x"));
+		parser.addArgument(new Argument().withLongName("flat").withShortName("f").withDescription("Output HTML as a flat set of divs"));
 		parser.addArgument(new Argument().withLongName("quiet").withShortName("q").withDescription("\tDon't print generation stats to stderr"));
 		parser.addArgument(new Argument().withLongName("help").withShortName("?").withDescription("\tShow command line usage"));
 		parser.addArgument(new Argument().withLongName("output").withShortName("o").withArgument("file").withDescription("Output to file"));

@@ -66,7 +66,15 @@ public class Box
 	 */
 	protected boolean m_altered = false;
 	
+	/**
+	 * The list of children for this node
+	 */
 	/*@ non_null @*/ protected final List<Box> m_children;
+	
+	/**
+	 * The parent of a given box
+	 */
+	protected Box m_parent;
 	
 	/**
 	 * Creates a new box with given position and dimensions.
@@ -227,14 +235,25 @@ public class Box
 		return max_depth + 1;
 	}
 	
-	public List<Box> getChildren()
+	/*@ non_null @*/ public List<Box> getChildren()
 	{
 		return m_children;
+	}
+	
+	/*@ null @*/ public Box getParent()
+	{
+		return m_parent;
+	}
+	
+	public void setParent(Box parent)
+	{
+		m_parent = parent;
 	}
 	
 	public void addChild(/*@ non_null @*/ Box r)
 	{
 		m_children.add(r);
+		r.setParent(this);
 		m_width = Math.max(m_width, Math.max(0, r.getX() + r.getWidth()));
 		m_height = Math.max(m_height, Math.max(0, r.getY() + r.getHeight()));
 	}

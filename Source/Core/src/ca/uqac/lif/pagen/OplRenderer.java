@@ -55,7 +55,7 @@ public class OplRenderer extends BoxRenderer
 		int size = boxes.size();
 		int top_id = b.getId();
 		ps.println("/****************************************");
-		ps.println(" * OPL 12.9.0.0 Model");
+		ps.println(" * OPL 12.10.0.0 Model");
 		ps.println(" * Tree size:             " + b.getSize());
 		ps.println(" * Tree depth:            " + b.getDepth());
 		ps.println("****************************************/");
@@ -70,7 +70,7 @@ public class OplRenderer extends BoxRenderer
 			ps.print(i);
 		}
 		ps.println("};");
-		ps.print("float Height[rectangles_id]=[");
+		ps.print("float ini_Height[rectangles_id]=[");
 		for (int i = 0; i < size; i++)
 		{
 			if (i > 0)
@@ -81,7 +81,7 @@ public class OplRenderer extends BoxRenderer
 		}
 		ps.println("];");
 		
-		ps.print("float Width[rectangles_id]=[");
+		ps.print("float ini_Width[rectangles_id]=[");
 		for (int i = 0; i < size; i++)
 		{
 			if (i > 0)
@@ -111,8 +111,15 @@ public class OplRenderer extends BoxRenderer
 			ps.print(boxes.get(i).getY());
 		}
 		ps.println("];");	
+		ps.println("dvar float Height[rectangles_id];");
+		ps.println("dvar float Width[rectangles_id];");
 		ps.println("dvar float left[rectangles_id];");
 		ps.println("dvar float top[rectangles_id];");
+		ps.println("execute");		
+		ps.println("{");
+		ps.println("cplex.tilim=1000;");	
+		ps.println("cplex.epgap=0.2;");	
+		ps.println("}");
 		ps.println("minimize sum(i in rectangles_id)(abs(top[i]-ini_top[i])+abs(left[i]-ini_left[i]));");
 		ps.println("subject to {");
 		ps.println("left[" + top_id + "]==ini_left[" + top_id + "];");
@@ -121,7 +128,58 @@ public class OplRenderer extends BoxRenderer
 		{
 			render(ps, lc);
 		}
+
+		// Next is to force boxes to be at least a minimal size
+		ps.println("forall(k in rectangles_id)");
+		ps.println("Width[k]>=ini_Width[k]; ");
+		ps.println("forall(l in rectangles_id)");
+		ps.println("Height[l]>=ini_Height[l]; ");
+		
 		ps.println("}");
+
+// Next section with execute DISPLAY will write the outputs in a good form.
+
+		ps.println("execute DISPLAY");
+		ps.println("{");
+
+		ps.println("write(\"var Top = [\");");
+		ps.println("for(var i in rectangles_id)");
+		ps.println("{");
+		ps.println("if (i!=(nb_rectangles-1))");
+		ps.println("write(top[i]+\", \");");
+		ps.println("else");
+		ps.println("write(top[i]+\"];\\n\");");
+		ps.println("}");
+
+		ps.println("write(\"var left = [\");");
+		ps.println("for(var i in rectangles_id)");
+		ps.println("{");
+		ps.println("if (i!=(nb_rectangles-1))");
+		ps.println("write(left[i]+\", \");");
+		ps.println("else");
+		ps.println("write(left[i]+\"];\\n\");");
+		ps.println("}");
+
+		ps.println("write(\"var height = [\");");
+		ps.println("for(var i in rectangles_id)");
+		ps.println("{");
+		ps.println("if (i!=(nb_rectangles-1))");
+		ps.println("write(Height[i]+\", \");");
+		ps.println("else");
+		ps.println("write(Height[i]+\"];\\n\");");
+		ps.println("}");
+
+		ps.println("write(\"var width = [\");");
+		ps.println("for(var i in rectangles_id)");
+		ps.println("{");
+		ps.println("if (i!=(nb_rectangles-1))");
+		ps.println("write(Width[i]+\", \");");
+		ps.println("else");
+		ps.println("write(Width[i]+\"];\\n\");");
+		ps.println("}");
+
+		ps.println("}");
+
 	}
 
 	protected static void render(PrintStream ps, LayoutConstraint c)
