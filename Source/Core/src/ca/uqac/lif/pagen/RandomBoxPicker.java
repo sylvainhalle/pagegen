@@ -83,6 +83,7 @@ public class RandomBoxPicker implements Picker<Box>
 	@Override
 	public void reset() 
 	{
+		Box.resetIds();
 		m_numChildren.reset();
 		m_depth.reset();
 	}

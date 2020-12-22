@@ -77,6 +77,15 @@ public class Box
 	protected Box m_parent;
 	
 	/**
+	 * Resets the ID counter used for boxes to zero. This is useful when
+	 * generating multiple trees, each with their own numbering. 
+	 */
+	public static void resetIds()
+	{
+		s_idCount = 0;
+	}
+	
+	/**
 	 * Creates a new box with given position and dimensions.
 	 * @param x The <i>x</i> position of the top-left corner of this box
 	 * @param y The <i>y</i> position of the top-left corner of this box
@@ -94,7 +103,7 @@ public class Box
 		m_children = new ArrayList<Box>();
 		m_padding = 0;
 	}
-	
+
 	/**
 	 * Marks a box as being "altered"
 	 */
