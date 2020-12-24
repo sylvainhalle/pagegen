@@ -1,24 +1,26 @@
 /*
     A random DOM tree generator
     Copyright (C) 2020 Sylvain Hallé
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published
     by the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package ca.uqac.lif.pagen;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,10 +29,17 @@ import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
 import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
 import ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
 
+/**
+ * Produces a file in the OPL format based on a tree of nested boxes.
+ * @author Stéphane Jacquet
+ */
 public class OplRenderer extends BoxRenderer
 {
+	/**
+	 * A set of constraints that applies to some of the boxes. 
+	 */
 	Set<LayoutConstraint> m_constraints;
-	
+
 	@SafeVarargs
 	public OplRenderer(Set<LayoutConstraint> ... constraints)
 	{
@@ -41,7 +50,12 @@ public class OplRenderer extends BoxRenderer
 			m_constraints.addAll(set);
 		}
 	}
-	
+
+	/**
+	 * Adds a set of constraints to apply to some of the boxes.
+	 * @param constraints The set of constraints
+	 * @return This renderer
+	 */
 	public OplRenderer addConstraints(Set<LayoutConstraint> constraints)
 	{
 		m_constraints.addAll(constraints);
@@ -53,6 +67,10 @@ public class OplRenderer extends BoxRenderer
 	{
 		Map<Integer,Box> boxes = b.flatten();
 		int size = boxes.size();
+		// Box IDs are put in a list so that we can always enumerate them
+		// in the same order
+		List<Integer> box_ids = new ArrayList<Integer>(size);
+		box_ids.addAll(boxes.keySet());
 		int top_id = b.getId();
 		ps.println("/****************************************");
 		ps.println(" * OPL 12.10.0.0 Model");
@@ -63,52 +81,57 @@ public class OplRenderer extends BoxRenderer
 		ps.print("{int} rectangles_id={");
 		for (int i = 0; i < size; i++)
 		{
+			int box_index = box_ids.get(i);
 			if (i > 0)
 			{
 				ps.print(", ");
 			}
-			ps.print(i);
+			ps.print(box_ids.get(box_index));
 		}
 		ps.println("};");
 		ps.print("float ini_Height[rectangles_id]=[");
 		for (int i = 0; i < size; i++)
 		{
+			int box_index = box_ids.get(i);
 			if (i > 0)
 			{
 				ps.print(", ");
 			}
-			ps.print(boxes.get(i).getHeight());
+			ps.print(boxes.get(box_index).getHeight());
 		}
 		ps.println("];");
-		
+
 		ps.print("float ini_Width[rectangles_id]=[");
 		for (int i = 0; i < size; i++)
 		{
+			int box_index = box_ids.get(i);
 			if (i > 0)
 			{
 				ps.print(", ");
 			}
-			ps.print(boxes.get(i).getWidth());
+			ps.print(boxes.get(box_index).getWidth());
 		}
 		ps.println("];");
 		ps.print("float ini_left[rectangles_id]=[");
 		for (int i = 0; i < size; i++)
 		{
+			int box_index = box_ids.get(i);
 			if (i > 0)
 			{
 				ps.print(", ");
 			}
-			ps.print(boxes.get(i).getX());
+			ps.print(boxes.get(box_index).getX());
 		}
 		ps.println("];");
 		ps.print("float ini_top[rectangles_id]=[");
 		for (int i = 0; i < size; i++)
 		{
+			int box_index = box_ids.get(i);
 			if (i > 0)
 			{
 				ps.print(", ");
 			}
-			ps.print(boxes.get(i).getY());
+			ps.print(boxes.get(box_index).getY());
 		}
 		ps.println("];");	
 		ps.println("dvar float Height[rectangles_id];");
@@ -134,11 +157,10 @@ public class OplRenderer extends BoxRenderer
 		ps.println("Width[k]>=ini_Width[k]; ");
 		ps.println("forall(l in rectangles_id)");
 		ps.println("Height[l]>=ini_Height[l]; ");
-		
+
 		ps.println("}");
 
-// Next section with execute DISPLAY will write the outputs in a good form.
-
+		// Next section with execute DISPLAY will write the outputs in a good form.
 		ps.println("execute DISPLAY");
 		ps.println("{");
 
@@ -201,7 +223,7 @@ public class OplRenderer extends BoxRenderer
 			renderContained(ps, (Contained) c);
 		}
 	}
-	
+
 	protected static void renderVerticallyAligned(PrintStream ps, VerticallyAligned c)
 	{
 		Set<Box> boxes = new HashSet<Box>(c.m_boxes.size());
@@ -226,7 +248,7 @@ public class OplRenderer extends BoxRenderer
 			ps.println("top[" + first.m_id + "]==top[" + b.m_id + "];");
 		}
 	}
-	
+
 	protected static void renderHorizontallyAligned(PrintStream ps, HorizontallyAligned c)
 	{
 		Set<Box> boxes = new HashSet<Box>(c.m_boxes.size());
@@ -251,7 +273,7 @@ public class OplRenderer extends BoxRenderer
 			ps.println("left[" + first.m_id + "]==left[" + b.m_id + "];");
 		}
 	}
-	
+
 	protected static void renderDisjoint(PrintStream ps, Disjoint c)
 	{
 		int b1_id = c.m_box1.m_id;
@@ -261,7 +283,7 @@ public class OplRenderer extends BoxRenderer
 		ps.print("left[" + b1_id + "]+Width[" + b1_id + "]<= left[" + b2_id + "] || ");
 		ps.print("left[" + b2_id + "]+Width[" + b2_id + "]<= left[" + b1_id + "];\n");
 	}
-	
+
 	protected static void renderContained(PrintStream ps, Contained c)
 	{
 		int b1_id = c.m_box1.m_id;
