@@ -86,7 +86,7 @@ public class OplRenderer extends BoxRenderer
 			{
 				ps.print(", ");
 			}
-			ps.print(box_ids.get(box_index));
+			ps.print(box_index);
 		}
 		ps.println("};");
 		ps.print("float ini_Height[rectangles_id]=[");
