@@ -53,7 +53,7 @@ public class Main
 		ArgumentMap arg_map = parser.parse(args);
 		if (arg_map == null || arg_map.containsKey("help"))
 		{
-			parser.printHelp("Random DOM tree generator v1.2.1\n(C) 2020 Laboratoire d'informatique formelle\nUniversité du Québec à Chicoutimi, Canada\nhttps://liflab.ca\n\nUsage java -jar pagen.jar [options]", System.out);
+			parser.printHelp("Random DOM tree generator v1.2\n(C) 2020 Laboratoire d'informatique formelle\nUniversité du Québec à Chicoutimi, Canada\nhttps://liflab.ca\n\nUsage java -jar pagen.jar [options]", System.out);
 			System.exit(1);
 		}
 		if (arg_map.hasOption("min-depth"))
