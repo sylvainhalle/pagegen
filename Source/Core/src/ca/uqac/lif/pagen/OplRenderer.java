@@ -36,6 +36,11 @@ import ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
 public class OplRenderer extends BoxRenderer
 {
 	/**
+	 * The objective function used in the OPL model
+	 */
+	protected static final transient String s_objectiveFunction = "minimize sum(i in rectangles_id)(abs(top[i]-ini_top[i])+abs(left[i]-ini_left[i])+Height[i]-ini_Height[i]+Width[i]-ini_Width[i]);";
+	
+	/**
 	 * A set of constraints that applies to some of the boxes. 
 	 */
 	Set<LayoutConstraint> m_constraints;
@@ -143,7 +148,7 @@ public class OplRenderer extends BoxRenderer
 		ps.println("cplex.tilim=1000;");	
 		ps.println("cplex.epgap=0.2;");	
 		ps.println("}");
-		ps.println("minimize sum(i in rectangles_id)(abs(top[i]-ini_top[i])+abs(left[i]-ini_left[i]));");
+		ps.println(s_objectiveFunction);
 		ps.println("subject to {");
 		ps.println("left[" + top_id + "]==ini_left[" + top_id + "];");
 		ps.println("top[" + top_id + "]==ini_top[" + top_id + "];");
