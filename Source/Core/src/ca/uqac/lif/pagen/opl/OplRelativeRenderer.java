@@ -17,39 +17,47 @@
  */
 package ca.uqac.lif.pagen.opl;
 
-import java.util.HashSet;
+import java.io.PrintStream;
 import java.util.Set;
 
-import ca.uqac.lif.pagen.BoxRenderer;
+import ca.uqac.lif.pagen.Box;
+import ca.uqac.lif.pagen.BoxDependencyGraph;
 import ca.uqac.lif.pagen.LayoutConstraint;
 
-public abstract class OplRenderer extends BoxRenderer
+/**
+ * Produces a file in the OPL format based on a tree of nested boxes.
+ * @author Stéphane Jacquet
+ */
+public class OplRelativeRenderer extends OplRenderer
 {
 	/**
-	 * A set of constraints that applies to some of the boxes. 
+	 * The graph of dependencies between DOM nodes that the renderer uses to
+	 * model the variables.
 	 */
-	protected Set<LayoutConstraint> m_constraints;
+	protected BoxDependencyGraph m_graph;
 	
 	@SafeVarargs
-	public OplRenderer(Set<LayoutConstraint> ... constraints)
+	public OplRelativeRenderer(Set<LayoutConstraint> ... constraints)
 	{
-		super();
-		m_constraints = new HashSet<LayoutConstraint>();
-		for (Set<LayoutConstraint> set : constraints)
-		{
-			m_constraints.addAll(set);
-		}
+		super(constraints);
 	}
 	
 	/**
-	 * Adds a set of constraints to apply to some of the boxes.
-	 * @param constraints The set of constraints
+	 * Sets the dependency graph to be used for the rendering.
+	 * @param graph The graph
 	 * @return This renderer
 	 */
-	public OplRenderer addConstraints(Set<LayoutConstraint> constraints)
+	public OplRelativeRenderer setDependencyGraph(BoxDependencyGraph graph)
 	{
-		m_constraints.addAll(constraints);
+		m_graph = graph;
 		return this;
 	}
 
+	@Override
+	public void render(PrintStream ps, Box b)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

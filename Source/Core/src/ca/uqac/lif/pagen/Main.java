@@ -26,7 +26,7 @@ import ca.uqac.lif.pagen.CliParser.Argument;
 import ca.uqac.lif.pagen.CliParser.ArgumentMap;
 import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
-import ca.uqac.lif.pagen.opl.OplRenderer;
+import ca.uqac.lif.pagen.opl.OplAbsoluteRenderer;
 import ca.uqac.lif.synthia.Picker;
 import ca.uqac.lif.synthia.random.RandomIntervalFloat;
 import ca.uqac.lif.synthia.util.ElementPicker;
@@ -168,7 +168,7 @@ public class Main
 		}
 		else if (type.compareToIgnoreCase("opl") == 0)
 		{
-			renderer = new OplRenderer(hfl_1.getConstraints(), hfl_2.getConstraints(), vfl_1.getConstraints(), Contained.addContainmentConstraints(b), Disjoint.addContainmentConstraints(b));
+			renderer = new OplAbsoluteRenderer(hfl_1.getConstraints(), hfl_2.getConstraints(), vfl_1.getConstraints(), Contained.addContainmentConstraints(b), Disjoint.addContainmentConstraints(b));
 		}
 		else if (type.compareToIgnoreCase("dot") == 0)
 		{
