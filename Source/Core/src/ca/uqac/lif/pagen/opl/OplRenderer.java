@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ca.uqac.lif.pagen;
+package ca.uqac.lif.pagen.opl;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import ca.uqac.lif.pagen.Box;
+import ca.uqac.lif.pagen.BoxRenderer;
+import ca.uqac.lif.pagen.LayoutConstraint;
 import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
 import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
@@ -231,8 +234,8 @@ public class OplRenderer extends BoxRenderer
 
 	protected static void renderVerticallyAligned(PrintStream ps, VerticallyAligned c)
 	{
-		Set<Box> boxes = new HashSet<Box>(c.m_boxes.size());
-		boxes.addAll(c.m_boxes);
+		Set<Box> boxes = new HashSet<Box>(c.getBoxes().size());
+		boxes.addAll(c.getBoxes());
 		Box first = null;
 		for (Box b : boxes)
 		{
@@ -250,14 +253,14 @@ public class OplRenderer extends BoxRenderer
 		}
 		for (Box b : boxes)
 		{
-			ps.println("top[" + first.m_id + "]==top[" + b.m_id + "];");
+			ps.println("top[" + first.getId() + "]==top[" + b.getId() + "];");
 		}
 	}
 
 	protected static void renderHorizontallyAligned(PrintStream ps, HorizontallyAligned c)
 	{
-		Set<Box> boxes = new HashSet<Box>(c.m_boxes.size());
-		boxes.addAll(c.m_boxes);
+		Set<Box> boxes = new HashSet<Box>(c.getBoxes().size());
+		boxes.addAll(c.getBoxes());
 		Box first = null;
 		for (Box b : boxes)
 		{
@@ -275,14 +278,14 @@ public class OplRenderer extends BoxRenderer
 		}
 		for (Box b : boxes)
 		{
-			ps.println("left[" + first.m_id + "]==left[" + b.m_id + "];");
+			ps.println("left[" + first.getId() + "]==left[" + b.getId() + "];");
 		}
 	}
 
 	protected static void renderDisjoint(PrintStream ps, Disjoint c)
 	{
-		int b1_id = c.m_box1.m_id;
-		int b2_id = c.m_box2.m_id;
+		int b1_id = c.getFirstBox().getId();
+		int b2_id = c.getSecondBox().getId();
 		ps.print("top[" + b1_id + "]+Height[" + b1_id + "]<= top[" + b2_id + "] || ");
 		ps.print("top[" + b2_id + "]+Height[" + b2_id + "]<= top[" + b1_id + "] || ");
 		ps.print("left[" + b1_id + "]+Width[" + b1_id + "]<= left[" + b2_id + "] || ");
@@ -291,8 +294,8 @@ public class OplRenderer extends BoxRenderer
 
 	protected static void renderContained(PrintStream ps, Contained c)
 	{
-		int b1_id = c.m_box1.m_id;
-		int b2_id = c.m_box2.m_id;
+		int b1_id = c.getFirstBox().getId();
+		int b2_id = c.getSecondBox().getId();
 		ps.print("top[" + b1_id + "]<=top[" + b2_id + "];");
 		ps.print("top[" + b1_id + "]+Height[" + b1_id + "]>= top[" + b2_id + "]+Height[" + b2_id + "];");
 		ps.print("left[" + b1_id + "]<=left[" + b2_id + "];");

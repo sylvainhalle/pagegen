@@ -1,17 +1,17 @@
 /*
     A random DOM tree generator
     Copyright (C) 2020 Sylvain Hallé
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published
     by the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,18 +23,18 @@ import java.util.Set;
 
 public abstract class LayoutConstraint 
 {
-	
+
 	public LayoutConstraint()
 	{
 		super();
 	}
-	
+
 	/**
 	 * Gets the name of the constraint
 	 * @return The name of the constraint
 	 */
 	protected abstract String getName();
-	
+
 	/**
 	 * Determines if a constraint is valid
 	 * @return <tt>true</tt> if the constraint is valid, <tt>false</tt> otherwise
@@ -43,37 +43,56 @@ public abstract class LayoutConstraint
 	{
 		return true;
 	}
-	
+
 	public abstract static class BinaryLayoutConstraint extends LayoutConstraint
 	{
 		protected Box m_box1;
-		
+
 		protected Box m_box2;
-		
+
 		public BinaryLayoutConstraint(Box b1, Box b2)
 		{
 			super();
 			m_box1 = b1;
 			m_box2 = b2;
 		}
-		
+
+		public Box getFirstBox()
+		{
+			return m_box1;
+		}
+
+		public Box getSecondBox()
+		{
+			return m_box2;
+		}
+
 		@Override
 		protected boolean isValid()
 		{
 			return m_box1 != null && m_box2 != null && m_box1.getId() != m_box2.getId();
 		}
 	}
-	
+
 	public abstract static class MultiLayoutConstraint extends LayoutConstraint
 	{
 		protected Set<Box> m_boxes;
-		
+
 		public MultiLayoutConstraint()
 		{
 			super();
 			m_boxes = new HashSet<Box>();
 		}
-		
+
+		/**
+		 * Gets the set of boxes associated to the constraint.
+		 * @return The set of boxes
+		 */
+		public Set<Box> getBoxes()
+		{
+			return m_boxes;
+		}
+
 		/**
 		 * Adds a box subjected to a constraint
 		 * @param b The box
@@ -84,7 +103,7 @@ public abstract class LayoutConstraint
 			m_boxes.add(b);
 			return this;
 		}
-		
+
 		@Override
 		public String toString()
 		{
@@ -106,7 +125,7 @@ public abstract class LayoutConstraint
 			return out.toString();
 		}
 	}
-	
+
 	public static class HorizontallyAligned extends MultiLayoutConstraint
 	{
 		@Override
@@ -114,14 +133,14 @@ public abstract class LayoutConstraint
 		{
 			return "Horizontally aligned: ";
 		}
-		
+
 		@Override
 		protected boolean isValid()
 		{
 			return m_boxes.size() >= 2;
 		}
 	}
-	
+
 	public static class VerticallyAligned extends MultiLayoutConstraint
 	{
 		@Override
@@ -129,27 +148,27 @@ public abstract class LayoutConstraint
 		{
 			return "Vertically aligned: ";
 		}
-		
+
 		@Override
 		protected boolean isValid()
 		{
 			return m_boxes.size() >= 2;
 		}
 	}
-	
+
 	public static class Disjoint extends BinaryLayoutConstraint
 	{
 		public Disjoint(Box b1, Box b2) 
 		{
 			super(b1, b2);
 		}
-		
+
 		@Override
 		protected String getName()
 		{
 			return "Disjoint: ";
 		}
-		
+
 		/**
 		 * Parses a box tree and generates all the disjointness constraints between
 		 * all the children of a parent box
@@ -162,7 +181,7 @@ public abstract class LayoutConstraint
 			addDisjointnessConstraints(b, set);
 			return set;
 		}
-		
+
 		/**
 		 * Recursively arses a box tree and generates all the disjointness
 		 * constraints between all the children of a parent box
@@ -183,7 +202,7 @@ public abstract class LayoutConstraint
 			}
 		}
 	}
-	
+
 	public static class Contained extends BinaryLayoutConstraint
 	{
 		public Contained(Box parent, Box child) 
@@ -196,13 +215,13 @@ public abstract class LayoutConstraint
 		{
 			return "Contained: ";
 		}
-		
+
 		@Override
 		public String toString()
 		{
 			return m_box2.getId() + " within " + m_box1.getId();
 		}
-		
+
 		/**
 		 * Parses a box tree and generates all the containment constraints between
 		 * a parent box and its children
@@ -215,7 +234,7 @@ public abstract class LayoutConstraint
 			addContainmentConstraints(b, set);
 			return set;
 		}
-		
+
 		/**
 		 * Recursively arses a box tree and generates all the containment
 		 * constraints between a parent box and its children

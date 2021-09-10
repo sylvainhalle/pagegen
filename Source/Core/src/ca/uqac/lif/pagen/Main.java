@@ -26,6 +26,7 @@ import ca.uqac.lif.pagen.CliParser.Argument;
 import ca.uqac.lif.pagen.CliParser.ArgumentMap;
 import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
+import ca.uqac.lif.pagen.opl.OplRenderer;
 import ca.uqac.lif.synthia.Picker;
 import ca.uqac.lif.synthia.random.RandomIntervalFloat;
 import ca.uqac.lif.synthia.util.ElementPicker;
