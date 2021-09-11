@@ -17,9 +17,11 @@
  */
 package ca.uqac.lif.pagen;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 public class BoxDependencyGraph
@@ -30,27 +32,28 @@ public class BoxDependencyGraph
 	 */
 	protected Map<BoxProperty,Set<BoxDependency>> m_dependencies;
 	
-	protected Map<BoxProperty,BoxProperty> m_propertyPool;
-	
+	/**
+	 * Creates a new empty box dependency graph.
+	 */
 	public BoxDependencyGraph()
 	{
 		super();
 		m_dependencies = new HashMap<BoxProperty,Set<BoxDependency>>();
-		m_propertyPool = new HashMap<BoxProperty,BoxProperty>();
 	}
 	
+	/**
+	 * Adds a dependency between two box properties to the graph. Conceptually,
+	 * this corresponds to the creation of an edge between two nodes.
+	 * @param b1 The first box
+	 * @param p1 The first property
+	 * @param b2 The second box
+	 * @param p2 The second property
+	 * @return This graph
+	 */
 	public BoxDependencyGraph add(Box b1, BoxProperty.Property p1, Box b2, BoxProperty.Property p2)
 	{
-		BoxProperty bp1 = new BoxProperty(b1, p1);
-		if (m_propertyPool.containsKey(bp1))
-		{
-			bp1 = m_propertyPool.get(bp1);
-		}
-		BoxProperty bp2 = new BoxProperty(b2, p2);
-		if (m_propertyPool.containsKey(bp2))
-		{
-			bp2 = m_propertyPool.get(bp2);
-		}
+		BoxProperty bp1 = BoxProperty.get(b1, p1);
+		BoxProperty bp2 = BoxProperty.get(b2, p2);
 		Set<BoxDependency> deps = null;
 		if (m_dependencies.containsKey(bp1))
 		{
@@ -59,18 +62,86 @@ public class BoxDependencyGraph
 		else
 		{
 			deps = new HashSet<BoxDependency>();
+			m_dependencies.put(bp1, deps);
 		}
 		deps.add(new BoxDependency(bp1, bp2));
+		if (!m_dependencies.containsKey(bp2))
+		{
+			m_dependencies.put(bp2, new HashSet<BoxDependency>());
+		}
 		return this;
 	}
 	
-	/*@ non_null @*/ public Set<BoxDependency> getDependencies(Box b, BoxProperty.Property p)
+	/**
+	 * Gets the set of downstream dependencies for a given box property.
+	 * @param bp The box property
+	 * @return The set of other box dependencies
+	 */
+	/*@ non_null @*/ public Set<BoxDependency> getDependencies(BoxProperty bp)
 	{
-		BoxProperty bp1 = new BoxProperty(b, p);
-		if (m_propertyPool.containsKey(bp1))
+		if (m_dependencies.containsKey(bp))
 		{
-			bp1 = m_propertyPool.get(bp1);
+			return m_dependencies.get(bp);
 		}
+		return new HashSet<BoxDependency>(0);
+	}
+	
+	/*@ pure non_null @*/ public Map<BoxProperty,Set<BoxProperty>> getTransitiveClosure(BoxProperty ... starting_points)
+	{
+		Map<BoxProperty,Set<BoxProperty>> mapping = new HashMap<BoxProperty,Set<BoxProperty>>();
+		Set<BoxProperty> start_list = new HashSet<BoxProperty>();
+		if (starting_points.length == 0)
+		{
+			start_list.addAll(m_dependencies.keySet());
+		}
+		else
+		{
+			for (BoxProperty bp : starting_points)
+			{
+				start_list.add(bp);
+			}
+		}
+		for (BoxProperty start : start_list)
+		{
+			Set<BoxProperty> visited = new HashSet<BoxProperty>();
+			Set<BoxProperty> deps = new HashSet<BoxProperty>();
+			Queue<BoxProperty> to_explore = new ArrayDeque<BoxProperty>();
+			to_explore.add(start);
+			while (!to_explore.isEmpty())
+			{
+				BoxProperty bp = to_explore.remove();
+				if (visited.contains(bp))
+				{
+					continue;
+				}
+				visited.add(bp);
+				deps.add(bp.getDelta());
+				Set<BoxDependency> children = getDependencies(bp);
+				for (BoxDependency bd : children)
+				{
+					BoxProperty child_bp = bd.getInfluencedBy();
+					if (!deps.contains(child_bp) && !to_explore.contains(child_bp) 
+							&& !start.getBox().equals(child_bp.getBox()))
+					{
+						to_explore.add(child_bp);
+					}
+				}
+			}
+			mapping.put(start, deps);
+		}
+		return mapping;
+	}
+	
+	/**
+	 * Gets the set of downstream dependencies for a given box and a given
+	 * property. 
+	 * @param b The box
+	 * @param p The property
+	 * @return The set of other box dependencies
+	 */
+	/*@ pure non_null @*/ public Set<BoxDependency> getDependencies(Box b, BoxProperty.Property p)
+	{
+		BoxProperty bp1 = BoxProperty.get(b, p);
 		if (m_dependencies.containsKey(bp1))
 		{
 			return m_dependencies.get(bp1);

@@ -20,37 +20,47 @@ package ca.uqac.lif.pagen;
 public class BoxDependency
 {
 	/**
-	 * The box whose property is modified.
+	 * The box property.
 	 */
-	protected BoxProperty m_from;
+	/*@ non_null @*/ protected BoxProperty m_property;
 	
 	/**
-	 * The box whose property is influenced by the first box.
+	 * The box property that influences the other box property.
 	 */
-	protected BoxProperty m_to;
+	/*@ non_null @*/ protected BoxProperty m_influencedBy;
 	
 	/**
 	 * Creates a new box dependence.
-	 * @param from The box whose property is modified
-	 * @param to The box whose property is influenced by the first box
+	 * @param property The box whose property is modified
+	 * @param influenced_by The box whose property is influenced by the first box
 	 */
-	public BoxDependency(BoxProperty from, BoxProperty to)
+	public BoxDependency(/*@ non_null @*/ BoxProperty property, /*@ non_null @*/ BoxProperty influenced_by)
 	{
 		super();
-		m_from = from;
-		m_to = to;
+		m_property = property;
+		m_influencedBy = influenced_by;
+	}
+	
+	/*@ pure non_null @*/ public BoxProperty getProperty()
+	{
+		return m_property;
+	}
+	
+	/*@ pure non_null @*/ public BoxProperty getInfluencedBy()
+	{
+		return m_influencedBy;
 	}
 	
 	@Override
 	public String toString()
 	{
-		return m_from + "->" + m_to; 
+		return m_property + "->" + m_influencedBy; 
 	}
 	
 	@Override
 	public int hashCode()
 	{
-		return m_from.hashCode() + m_to.hashCode();
+		return m_property.hashCode() + m_influencedBy.hashCode();
 	}
 	
 	@Override
@@ -61,6 +71,6 @@ public class BoxDependency
 			return false;
 		}
 		BoxDependency bd = (BoxDependency) o;
-		return bd.m_from.equals(m_from) && bd.m_to.equals(m_to);
+		return bd.m_property.equals(m_property) && bd.m_influencedBy.equals(m_influencedBy);
 	}
 }

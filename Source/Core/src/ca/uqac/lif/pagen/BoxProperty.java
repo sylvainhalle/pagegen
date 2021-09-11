@@ -17,9 +17,15 @@
  */
 package ca.uqac.lif.pagen;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class BoxProperty
 {
-	public static enum Property {X, Y, W, H}
+	/**
+	 * The possible properties that can be modeled about a box.
+	 */
+	public static enum Property {X, Y, W, H, DX, DY, DW, DH}
 	
 	/**
 	 * The box whose property is being considered.
@@ -32,15 +38,68 @@ public class BoxProperty
 	protected Property m_property;
 	
 	/**
+	 * A map used to store references to already instantiated box properties. Its
+	 * goal is to avoid creating multiple instances of {@link BoxProperty}
+	 * objects referring to the same box and the same property.
+	 */
+	protected static final Map<BoxProperty,BoxProperty> s_propertyPool = new HashMap<BoxProperty,BoxProperty>();
+	
+	/**
+	 * Gets an instance of a box property.
+	 * @param b The box whose property is being considered
+	 * @param p The property of the box
+	 */
+	public static BoxProperty get(Box b, Property p)
+	{
+		BoxProperty bp = new BoxProperty(b, p);
+		if (s_propertyPool.containsKey(bp))
+		{
+			bp = s_propertyPool.get(bp);
+		}
+		else
+		{
+			s_propertyPool.put(bp, bp);
+		}
+		return bp;
+	}
+	
+	/**
 	 * Creates a new box property.
 	 * @param b The box whose property is being considered
 	 * @param p The property of the box
 	 */
-	public BoxProperty(Box b, Property p)
+	protected BoxProperty(Box b, Property p)
 	{
 		super();
 		m_box = b;
 		m_property = p;
+	}
+	
+	/*@ pure non_null @*/ public BoxProperty getDelta()
+	{
+		switch (m_property)
+		{
+		case X:
+			return get(m_box, Property.DX);
+		case Y:
+			return get(m_box, Property.DY);
+		case H:
+			return get(m_box, Property.DH);
+		case W:
+			return get(m_box, Property.DW);
+		default:
+			return this;
+		}
+	}
+	
+	/*@ pure non_null @*/ public Box getBox()
+	{
+		return m_box;
+	}
+	
+	/*@ pure non_null @*/ public Property getProperty()
+	{
+		return m_property;
 	}
 	
 	@Override
