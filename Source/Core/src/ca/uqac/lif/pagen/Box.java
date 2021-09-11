@@ -1,6 +1,6 @@
 /*
     A random DOM tree generator
-    Copyright (C) 2020 Sylvain Hallé
+    Copyright (C) 2020-2021 Sylvain Hallé
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published
@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Box 
+public class Box implements Comparable<Box>
 {
 	/**
 	 * A counter to give IDs to boxes
@@ -323,5 +323,11 @@ public class Box
 			return false;
 		}
 		return m_id == ((Box) o).getId();
+	}
+
+	@Override
+	public int compareTo(Box b)
+	{
+		return m_id - b.m_id;
 	}
 }

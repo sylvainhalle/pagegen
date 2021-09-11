@@ -18,10 +18,15 @@
 package ca.uqac.lif.pagen.opl;
 
 import java.io.PrintStream;
+import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
 
 import ca.uqac.lif.pagen.Box;
+import ca.uqac.lif.pagen.BoxDependency;
 import ca.uqac.lif.pagen.BoxDependencyGraph;
+import ca.uqac.lif.pagen.BoxProperty;
 import ca.uqac.lif.pagen.LayoutConstraint;
 
 /**
@@ -34,12 +39,34 @@ public class OplRelativeRenderer extends OplRenderer
 	 * The graph of dependencies between DOM nodes that the renderer uses to
 	 * model the variables.
 	 */
-	protected BoxDependencyGraph m_graph;
+	protected BoxDependencyGraph m_graph = null;
+	
+	/**
+	 * The set of boxes properties that are directly involved in a constraint
+	 * violation.
+	 */
+	protected Set<BoxProperty> m_faultyBoxes;
 	
 	@SafeVarargs
 	public OplRelativeRenderer(Set<LayoutConstraint> ... constraints)
 	{
 		super(constraints);
+		m_faultyBoxes = new HashSet<BoxProperty>();
+	}
+	
+	/**
+	 * Adds one or more box properties to the set of boxes that are directly
+	 * involved in a constraint violation.
+	 * @param boxes The boxes to add
+	 * @return This renderer
+	 */
+	public OplRelativeRenderer addFaultyBoxProperty(BoxProperty ... properties)
+	{
+		for (BoxProperty bp : properties)
+		{
+			m_faultyBoxes.add(bp);
+		}
+		return this;
 	}
 	
 	/**
@@ -54,10 +81,28 @@ public class OplRelativeRenderer extends OplRenderer
 	}
 
 	@Override
-	public void render(PrintStream ps, Box b)
+	public void render(PrintStream ps, Box root)
 	{
-		// TODO Auto-generated method stub
-		
+		Set<BoxProperty> properties_to_model = getPropertiesToModel();
+		for (BoxProperty bp : properties_to_model)
+		{
+			
+		}
 	}
 	
+	/**
+	 * Fetches all the box properties that are impacted by the faulty boxes
+	 * @return
+	 */
+	protected Set<BoxProperty> getPropertiesToModel()
+	{
+		Set<BoxProperty> properties_to_model = new HashSet<BoxProperty>();
+		// Step 1: fetch all box properties that are impacted by the faulty boxes
+		for (BoxProperty start : m_faultyBoxes)
+		{
+			properties_to_model.add(start);
+			
+		}
+		return properties_to_model;
+	}
 }
