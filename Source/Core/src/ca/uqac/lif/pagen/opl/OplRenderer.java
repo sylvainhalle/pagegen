@@ -17,11 +17,16 @@
  */
 package ca.uqac.lif.pagen.opl;
 
+import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Set;
 
 import ca.uqac.lif.pagen.BoxRenderer;
 import ca.uqac.lif.pagen.LayoutConstraint;
+import ca.uqac.lif.pagen.LayoutConstraint.Contained;
+import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
+import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
+import ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
 
 public abstract class OplRenderer extends BoxRenderer
 {
@@ -51,5 +56,33 @@ public abstract class OplRenderer extends BoxRenderer
 		m_constraints.addAll(constraints);
 		return this;
 	}
+	
+	protected void render(PrintStream ps, LayoutConstraint c)
+	{
+		if (c instanceof VerticallyAligned)
+		{
+			renderVerticallyAligned(ps, (VerticallyAligned) c);
+		}
+		else if (c instanceof HorizontallyAligned)
+		{
+			renderHorizontallyAligned(ps, (HorizontallyAligned) c);
+		}
+		else if (c instanceof Disjoint)
+		{
+			renderDisjoint(ps, (Disjoint) c);
+		}
+		else if (c instanceof Contained)
+		{
+			renderContained(ps, (Contained) c);
+		}
+	}
+	
+	protected abstract void renderVerticallyAligned(PrintStream ps, VerticallyAligned c);
+	
+	protected abstract void renderHorizontallyAligned(PrintStream ps, HorizontallyAligned c);
+	
+	protected abstract void renderDisjoint(PrintStream ps, Disjoint c);
+	
+	protected abstract void renderContained(PrintStream ps, Contained c);
 
 }

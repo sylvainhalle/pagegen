@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ca.uqac.lif.pagen.opl;
+package ca.uqac.lif.pagen;
 
 import org.junit.Test;
 

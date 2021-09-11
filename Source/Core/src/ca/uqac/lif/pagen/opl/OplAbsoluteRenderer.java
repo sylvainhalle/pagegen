@@ -190,27 +190,8 @@ public class OplAbsoluteRenderer extends OplRenderer
 
 	}
 
-	protected static void render(PrintStream ps, LayoutConstraint c)
-	{
-		if (c instanceof VerticallyAligned)
-		{
-			renderVerticallyAligned(ps, (VerticallyAligned) c);
-		}
-		else if (c instanceof HorizontallyAligned)
-		{
-			renderHorizontallyAligned(ps, (HorizontallyAligned) c);
-		}
-		else if (c instanceof Disjoint)
-		{
-			renderDisjoint(ps, (Disjoint) c);
-		}
-		else if (c instanceof Contained)
-		{
-			renderContained(ps, (Contained) c);
-		}
-	}
-
-	protected static void renderVerticallyAligned(PrintStream ps, VerticallyAligned c)
+	@Override
+	protected void renderVerticallyAligned(PrintStream ps, VerticallyAligned c)
 	{
 		Set<Box> boxes = new HashSet<Box>(c.getBoxes().size());
 		boxes.addAll(c.getBoxes());
@@ -235,7 +216,8 @@ public class OplAbsoluteRenderer extends OplRenderer
 		}
 	}
 
-	protected static void renderHorizontallyAligned(PrintStream ps, HorizontallyAligned c)
+	@Override
+	protected void renderHorizontallyAligned(PrintStream ps, HorizontallyAligned c)
 	{
 		Set<Box> boxes = new HashSet<Box>(c.getBoxes().size());
 		boxes.addAll(c.getBoxes());
@@ -260,7 +242,8 @@ public class OplAbsoluteRenderer extends OplRenderer
 		}
 	}
 
-	protected static void renderDisjoint(PrintStream ps, Disjoint c)
+	@Override
+	protected void renderDisjoint(PrintStream ps, Disjoint c)
 	{
 		int b1_id = c.getFirstBox().getId();
 		int b2_id = c.getSecondBox().getId();
@@ -270,7 +253,8 @@ public class OplAbsoluteRenderer extends OplRenderer
 		ps.print("left[" + b2_id + "]+Width[" + b2_id + "]<= left[" + b1_id + "];\n");
 	}
 
-	protected static void renderContained(PrintStream ps, Contained c)
+	@Override
+	protected void renderContained(PrintStream ps, Contained c)
 	{
 		int b1_id = c.getFirstBox().getId();
 		int b2_id = c.getSecondBox().getId();

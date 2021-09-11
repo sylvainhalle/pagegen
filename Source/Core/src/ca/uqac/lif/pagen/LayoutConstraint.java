@@ -98,7 +98,7 @@ public abstract class LayoutConstraint
 		 * @param b The box
 		 * @return This constraint
 		 */
-		public LayoutConstraint add(Box b)
+		public MultiLayoutConstraint add(Box b)
 		{
 			m_boxes.add(b);
 			return this;

@@ -86,20 +86,12 @@ public class BoxDependencyGraph
 		return new HashSet<BoxDependency>(0);
 	}
 	
-	/*@ pure non_null @*/ public Map<BoxProperty,Set<BoxProperty>> getTransitiveClosure(BoxProperty ... starting_points)
+	/*@ pure non_null @*/ public Map<BoxProperty,Set<BoxProperty>> getTransitiveClosure(Set<BoxProperty> start_list)
 	{
 		Map<BoxProperty,Set<BoxProperty>> mapping = new HashMap<BoxProperty,Set<BoxProperty>>();
-		Set<BoxProperty> start_list = new HashSet<BoxProperty>();
-		if (starting_points.length == 0)
+		if (start_list.isEmpty())
 		{
 			start_list.addAll(m_dependencies.keySet());
-		}
-		else
-		{
-			for (BoxProperty bp : starting_points)
-			{
-				start_list.add(bp);
-			}
 		}
 		for (BoxProperty start : start_list)
 		{
@@ -130,6 +122,16 @@ public class BoxDependencyGraph
 			mapping.put(start, deps);
 		}
 		return mapping;
+	}
+	
+	/*@ pure non_null @*/ public Map<BoxProperty,Set<BoxProperty>> getTransitiveClosure(BoxProperty ... starting_points)
+	{
+		Set<BoxProperty> start_list = new HashSet<BoxProperty>();
+		for (BoxProperty bp : starting_points)
+		{
+			start_list.add(bp);
+		}
+		return getTransitiveClosure(start_list);
 	}
 	
 	/**

@@ -20,7 +20,7 @@ package ca.uqac.lif.pagen;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BoxProperty
+public class BoxProperty implements Comparable<BoxProperty>
 {
 	/**
 	 * The possible properties that can be modeled about a box.
@@ -124,4 +124,44 @@ public class BoxProperty
 		BoxProperty bp = (BoxProperty) o;
 		return bp.m_box.equals(m_box) && bp.m_property == m_property;
 	}
+
+	@Override
+	public int compareTo(BoxProperty bp)
+	{
+		int comp = m_box.compareTo(bp.getBox());
+		if (comp != 0)
+		{
+			return comp;
+		}
+		if (m_property == bp.m_property)
+		{
+			return 0;
+		}
+		switch (m_property)
+		{
+		case DX:
+			return -1;
+		case DY:
+			return bp.m_property == Property.DX ? 1 : -1;
+		case DH:
+			return (bp.m_property == Property.DX || bp.m_property == Property.DY) ? 1 : -1;
+		case DW:
+			return (bp.m_property == Property.DX || bp.m_property == Property.DY
+				|| bp.m_property == Property.DH) ? 1 : -1;
+		case X:
+			return (bp.m_property == Property.DX || bp.m_property == Property.DY
+				|| bp.m_property == Property.DH || bp.m_property == Property.DW) ? 1 : -1;
+		case Y:
+			return (bp.m_property == Property.DX || bp.m_property == Property.DY
+				|| bp.m_property == Property.DH || bp.m_property == Property.DW
+				|| bp.m_property == Property.X) ? 1 : -1;
+		case W:
+			return (bp.m_property == Property.DX || bp.m_property == Property.DY
+				|| bp.m_property == Property.DH || bp.m_property == Property.DW
+				|| bp.m_property == Property.X || bp.m_property == Property.Y) ? 1 : -1;
+			default:
+				return 1;
+		}
+	}
+	
 }
