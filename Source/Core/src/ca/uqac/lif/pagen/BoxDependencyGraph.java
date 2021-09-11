@@ -42,18 +42,28 @@ public class BoxDependencyGraph
 	}
 	
 	/**
-	 * Adds a dependency between two box properties to the graph. Conceptually,
-	 * this corresponds to the creation of an edge between two nodes.
-	 * @param b1 The first box
-	 * @param p1 The first property
-	 * @param b2 The second box
-	 * @param p2 The second property
+	 * Adds a set of dependencies to the graph.
+	 * @param dependencies The set of dependencies
 	 * @return This graph
 	 */
-	public BoxDependencyGraph add(Box b1, BoxProperty.Property p1, Box b2, BoxProperty.Property p2)
+	public BoxDependencyGraph add(Set<BoxDependency> dependencies)
 	{
-		BoxProperty bp1 = BoxProperty.get(b1, p1);
-		BoxProperty bp2 = BoxProperty.get(b2, p2);
+		for (BoxDependency bd : dependencies)
+		{
+			add(bd.getProperty(), bd.getInfluencedBy());
+		}
+		return this;
+	}
+	
+	/**
+	 * Adds a dependency between two box properties to the graph. Conceptually,
+	 * this corresponds to the creation of an edge between two nodes.
+	 * @param bp1 The first box property
+	 * @param bp2 The second box property
+	 * @return This graph
+	 */
+	public BoxDependencyGraph add(BoxProperty bp1, BoxProperty bp2)
+	{
 		Set<BoxDependency> deps = null;
 		if (m_dependencies.containsKey(bp1))
 		{
@@ -70,6 +80,20 @@ public class BoxDependencyGraph
 			m_dependencies.put(bp2, new HashSet<BoxDependency>());
 		}
 		return this;
+	}
+	
+	/**
+	 * Adds a dependency between two box properties to the graph. Conceptually,
+	 * this corresponds to the creation of an edge between two nodes.
+	 * @param b1 The first box
+	 * @param p1 The first property
+	 * @param b2 The second box
+	 * @param p2 The second property
+	 * @return This graph
+	 */
+	public BoxDependencyGraph add(Box b1, BoxProperty.Property p1, Box b2, BoxProperty.Property p2)
+	{
+		return add(BoxProperty.get(b1, p1), BoxProperty.get(b2, p2));
 	}
 	
 	/**

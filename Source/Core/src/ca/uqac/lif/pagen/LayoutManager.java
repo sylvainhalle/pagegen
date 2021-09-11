@@ -1,6 +1,6 @@
 /*
     A random DOM tree generator
-    Copyright (C) 2020 Sylvain Hallé
+    Copyright (C) 2020-2021 Sylvain Hallé
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published
@@ -35,4 +35,11 @@ public interface LayoutManager
 	 * @return The set of layout constraints
 	 */
 	public Set<LayoutConstraint> getConstraints();
+	
+	/**
+	 * Gets the set of box dependencies accumulated by the operation of this
+	 * layout manager
+	 * @return The set of box dependencies
+	 */
+	public Set<BoxDependency> getDependencies();
 }

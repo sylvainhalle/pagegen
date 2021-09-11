@@ -1,17 +1,17 @@
 /*
     A random DOM tree generator
     Copyright (C) 2020 Sylvain Hallé
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published
     by the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -34,7 +34,7 @@ public class HorizontalFlowLayout extends FlowLayout
 	{
 		super(max_elements);
 	}
-	
+
 	/**
 	 * Creates a new horizontal flow layout manager
 	 */
@@ -42,7 +42,7 @@ public class HorizontalFlowLayout extends FlowLayout
 	{
 		this(new Constant<Integer>(0));
 	}
-	
+
 	@Override
 	public void arrange(Box parent, List<Box> children)
 	{
@@ -60,6 +60,15 @@ public class HorizontalFlowLayout extends FlowLayout
 		{
 			Box b = children.get(i);
 			parent.addChild(b);
+			BoxProperty bp_x = BoxProperty.get(children.get(i), BoxProperty.Property.X);
+			BoxProperty bp_y = BoxProperty.get(children.get(i), BoxProperty.Property.Y);
+			m_dependencies.add(new BoxDependency(bp_x, BoxProperty.get(parent, BoxProperty.Property.X)));
+			m_dependencies.add(new BoxDependency(bp_y, BoxProperty.get(parent, BoxProperty.Property.Y)));
+			if (i > 0)
+			{
+				m_dependencies.add(new BoxDependency(bp_x, BoxProperty.get(children.get(i - 1), BoxProperty.Property.X)));
+				m_dependencies.add(new BoxDependency(bp_x, BoxProperty.get(children.get(i - 1), BoxProperty.Property.W)));
+			}
 			boolean alignment_toss = m_injectAlignementFault.pick();
 			float y_shift = 0;
 			boolean altered = false;

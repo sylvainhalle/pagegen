@@ -1,6 +1,6 @@
 /*
     A random DOM tree generator
-    Copyright (C) 2020 Sylvain Hallé
+    Copyright (C) 2020-2021 Sylvain Hallé
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published
@@ -27,6 +27,7 @@ import ca.uqac.lif.pagen.CliParser.ArgumentMap;
 import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
 import ca.uqac.lif.pagen.opl.OplAbsoluteRenderer;
+import ca.uqac.lif.pagen.opl.OplRelativeRenderer;
 import ca.uqac.lif.synthia.Picker;
 import ca.uqac.lif.synthia.random.RandomIntervalFloat;
 import ca.uqac.lif.synthia.util.ElementPicker;
@@ -54,8 +55,12 @@ public class Main
 		ArgumentMap arg_map = parser.parse(args);
 		if (arg_map == null || arg_map.containsKey("help"))
 		{
-			parser.printHelp("Random DOM tree generator v1.2\n(C) 2020 Laboratoire d'informatique formelle\nUniversité du Québec à Chicoutimi, Canada\nhttps://liflab.ca\n\nUsage java -jar pagen.jar [options]", System.out);
+			parser.printHelp("Random DOM tree generator v1.3\n(C) 2020-2021 Laboratoire d'informatique formelle\nUniversité du Québec à Chicoutimi, Canada\nhttps://liflab.ca\n\nUsage java -jar pagen.jar [options]", System.out);
 			System.exit(1);
+		}
+		if (arg_map.hasOption("quiet"))
+		{
+			quiet = true;
 		}
 		if (arg_map.hasOption("min-depth"))
 		{
@@ -168,7 +173,22 @@ public class Main
 		}
 		else if (type.compareToIgnoreCase("opl") == 0)
 		{
-			renderer = new OplAbsoluteRenderer(hfl_1.getConstraints(), hfl_2.getConstraints(), vfl_1.getConstraints(), Contained.addContainmentConstraints(b), Disjoint.addContainmentConstraints(b));
+			if (arg_map.hasOption("relative"))
+			{
+				renderer = new OplRelativeRenderer(hfl_1.getConstraints(), hfl_2.getConstraints(), vfl_1.getConstraints(), Contained.addContainmentConstraints(b), Disjoint.addContainmentConstraints(b));
+				BoxDependencyGraph g = new BoxDependencyGraph();
+				if (!arg_map.hasOption("flat"))
+				{
+					g.add(hfl_1.getDependencies());
+					//g.add(hfl_2.getDependencies());
+					//g.add(vfl_1.getDependencies());
+				}
+				((OplRelativeRenderer) renderer).setDependencyGraph(g);
+			}
+			else
+			{
+				renderer = new OplAbsoluteRenderer(hfl_1.getConstraints(), hfl_2.getConstraints(), vfl_1.getConstraints(), Contained.addContainmentConstraints(b), Disjoint.addContainmentConstraints(b));
+			}
 		}
 		else if (type.compareToIgnoreCase("dot") == 0)
 		{
@@ -198,6 +218,7 @@ public class Main
 	{
 		CliParser parser = new CliParser();
 		parser.addArgument(new Argument().withLongName("type").withShortName("t").withArgument("x").withDescription("\tOutput file of type x (html, dot, opl)"));
+		parser.addArgument(new Argument().withLongName("relative").withShortName("r").withDescription("\tUse relative encoding for OPL"));
 		parser.addArgument(new Argument().withLongName("seed").withShortName("s").withArgument("x").withDescription("\tInitialize RNG with seed s"));
 		parser.addArgument(new Argument().withLongName("misalign").withShortName("m").withArgument("x").withDescription("\tSet misalignment probability to p (in [0,1])"));
 		parser.addArgument(new Argument().withLongName("overlap").withShortName("l").withArgument("x").withDescription("\tSet overlap probability to p (in [0,1])"));

@@ -31,6 +31,11 @@ public abstract class FlowLayout implements LayoutManager
 	protected Set<LayoutConstraint> m_constraints;
 	
 	/**
+	 * A set of constraints produced by the layout manager
+	 */
+	protected Set<BoxDependency> m_dependencies;
+	
+	/**
 	 * The maximum number of elements to flow before moving to the
 	 * next line
 	 */
@@ -98,6 +103,7 @@ public abstract class FlowLayout implements LayoutManager
 		m_maxElements = max_elements;
 		m_spacing = 2;
 		m_constraints = new HashSet<LayoutConstraint>();
+		m_dependencies = new HashSet<BoxDependency>();
 	}
 	
 	/**
@@ -169,5 +175,11 @@ public abstract class FlowLayout implements LayoutManager
 	public Set<LayoutConstraint> getConstraints()
 	{
 		return m_constraints;
+	}
+	
+	@Override
+	public Set<BoxDependency> getDependencies()
+	{
+		return m_dependencies;
 	}
 }

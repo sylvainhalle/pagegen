@@ -60,6 +60,15 @@ public class VerticalFlowLayout extends FlowLayout
 		{
 			Box b = children.get(i);
 			parent.addChild(b);
+			BoxProperty bp_x = BoxProperty.get(children.get(i), BoxProperty.Property.X);
+			BoxProperty bp_y = BoxProperty.get(children.get(i), BoxProperty.Property.Y);
+			m_dependencies.add(new BoxDependency(bp_x, BoxProperty.get(parent, BoxProperty.Property.X)));
+			m_dependencies.add(new BoxDependency(bp_y, BoxProperty.get(parent, BoxProperty.Property.Y)));
+			if (i > 0)
+			{
+				m_dependencies.add(new BoxDependency(bp_y, BoxProperty.get(children.get(i - 1), BoxProperty.Property.Y)));
+				m_dependencies.add(new BoxDependency(bp_y, BoxProperty.get(children.get(i - 1), BoxProperty.Property.H)));
+			}
 			boolean toss = m_injectAlignementFault.pick();
 			float x_shift = 0;
 			if (toss)

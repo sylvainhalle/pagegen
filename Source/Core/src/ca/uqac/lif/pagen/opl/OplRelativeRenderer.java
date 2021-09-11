@@ -369,9 +369,9 @@ public class OplRelativeRenderer extends OplRenderer
 		for (Box b : boxes)
 		{
 			BoxProperty other_property = BoxProperty.get(b, Property.Y);
-			printProperty(ps, first_property);
+			printTerm(ps, first_property);
 			ps.print("==");
-			printProperty(ps, other_property);
+			printTerm(ps, other_property);
 			ps.println(";");
 		}
 	}
@@ -416,7 +416,6 @@ public class OplRelativeRenderer extends OplRenderer
 		printTerm(ps, b2_w);
 		ps.print(" <= ");
 		printTerm(ps, b1_x);
-		ps.print(" || ");
 		ps.println(";");
 	}
 

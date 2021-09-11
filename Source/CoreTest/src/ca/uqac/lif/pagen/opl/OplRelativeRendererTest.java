@@ -39,10 +39,10 @@ import static ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
 public class OplRelativeRendererTest
 {
 	protected static final Box A = new Box(0, 0, 100, 80);
-	protected static final Box B = new Box(10, 10, 30, 30);
-	protected static final Box C = new Box(50, 50, 20, 20);
-	protected static final Box D = new Box(0, 0, 0, 0);
-	protected static final Box E = new Box(0, 0, 0, 0);
+	protected static final Box B = new Box(10, 8, 30, 30);
+	protected static final Box C = new Box(50, 8, 20, 20);
+	protected static final Box D = new Box(0, 50, 15, 15);
+	protected static final Box E = new Box(50, 30, 25, 15);
 	
 	@Test
 	public void test1()
