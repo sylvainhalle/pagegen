@@ -18,6 +18,7 @@
 package ca.uqac.lif.pagen.opl;
 
 import static ca.uqac.lif.pagen.BoxProperty.Property.X;
+import static ca.uqac.lif.pagen.BoxProperty.Property.Y;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -31,6 +32,7 @@ import ca.uqac.lif.pagen.BoxDependencyGraph;
 import ca.uqac.lif.pagen.LayoutConstraint;
 
 import static ca.uqac.lif.pagen.LayoutConstraint.Contained;
+import static ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
 import static ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
 import static ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
 
@@ -47,12 +49,14 @@ public class OplRelativeRendererTest
 	{
 		BoxDependencyGraph g = new BoxDependencyGraph();
 		g.add(B, X, A, X);
+		//g.add(B, Y, A, Y);
 		g.add(C, X, A, X);
+		g.add(E, X, C, X);
 		g.add(D, X, B, X);
 		g.add(E, X, B, X);
 		Set<LayoutConstraint> constraints = new HashSet<LayoutConstraint>();
 		constraints.add(new VerticallyAligned().add(B).add(C));
-		constraints.add(new Contained(A, B));
+		constraints.add(new Disjoint(C, E));
 		OplRelativeRenderer renderer = new OplRelativeRenderer(constraints);
 		renderer.setDependencyGraph(g);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

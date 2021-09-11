@@ -29,6 +29,7 @@ import ca.uqac.lif.pagen.Box;
 import ca.uqac.lif.pagen.BoxDependencyGraph;
 import ca.uqac.lif.pagen.BoxProperty;
 import ca.uqac.lif.pagen.BoxProperty.Property;
+import ca.uqac.lif.pagen.LayoutConstraint.BinaryLayoutConstraint;
 import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
 import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
@@ -89,6 +90,7 @@ public class OplRelativeRenderer extends OplRenderer
 	{
 		super(constraints);
 		m_faultyBoxes = new HashSet<BoxProperty>();
+		fillFaultyBoxes(constraints);
 	}
 
 	/**
@@ -104,6 +106,53 @@ public class OplRelativeRenderer extends OplRenderer
 			m_faultyBoxes.add(bp);
 		}
 		return this;
+	}
+	
+	@SafeVarargs
+	protected final void fillFaultyBoxes(Set<LayoutConstraint> ... constraints)
+	{
+		for (Set<LayoutConstraint> set : constraints)
+		{
+			for (LayoutConstraint c : set)
+			{
+				if (c instanceof VerticallyAligned)
+				{
+					VerticallyAligned va = (VerticallyAligned) c;
+					for (Box b : va.getBoxes())
+					{
+						BoxProperty bp = BoxProperty.get(b, Property.X);
+						m_faultyBoxes.add(bp);
+					}
+				}
+				if (c instanceof HorizontallyAligned)
+				{
+					HorizontallyAligned va = (HorizontallyAligned) c;
+					for (Box b : va.getBoxes())
+					{
+						BoxProperty bp = BoxProperty.get(b, Property.Y);
+						m_faultyBoxes.add(bp);
+					}
+				}
+				if (c instanceof BinaryLayoutConstraint) // Contained and Disjoint
+				{
+					BinaryLayoutConstraint va = (BinaryLayoutConstraint) c;
+					{
+						Box b = va.getFirstBox();
+						m_faultyBoxes.add(BoxProperty.get(b, Property.X));
+						m_faultyBoxes.add(BoxProperty.get(b, Property.Y));
+						m_faultyBoxes.add(BoxProperty.get(b, Property.W));
+						m_faultyBoxes.add(BoxProperty.get(b, Property.H));
+					}
+					{
+						Box b = va.getSecondBox();
+						m_faultyBoxes.add(BoxProperty.get(b, Property.X));
+						m_faultyBoxes.add(BoxProperty.get(b, Property.Y));
+						m_faultyBoxes.add(BoxProperty.get(b, Property.W));
+						m_faultyBoxes.add(BoxProperty.get(b, Property.H));
+					}
+				}
+			}
+		}
 	}
 
 	/**
