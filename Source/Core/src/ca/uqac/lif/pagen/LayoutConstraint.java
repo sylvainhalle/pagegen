@@ -33,9 +33,9 @@ public abstract class LayoutConstraint
 	 * boxes it considers.
 	 */
 	protected Boolean m_verdict = null;
-	
+
 	protected static boolean DISABLE_DISJOINT = false;
-	
+
 	protected static boolean DISABLE_CONTAIN = false;
 
 	/**
@@ -517,37 +517,57 @@ public abstract class LayoutConstraint
 				return props;
 			boolean b1_influ_b2 = g.influences(m_box1, m_box2);
 			boolean b2_influ_b1 = g.influences(m_box2, m_box1);
+			boolean dx = isDisjointInX();
+			boolean dy = isDisjointInY();
 			if (bp == null)
 			{
 				if (b1_influ_b2)
 				{
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+					if (!dx)
+					{
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+					}
+					if (!dy)
+					{
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
+					}
 				}
 				else if (b2_influ_b1)
 				{
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+					if (!dx)
+					{
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
+					}
+					if (!dy)
+					{
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+					}
 				}
 				else
 				{
 					// Everything is fair game
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+					if (!dx)
+					{
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+					}
+					if (!dy)
+					{
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+					}
 				}
 				return props;
 			}
@@ -625,15 +645,25 @@ public abstract class LayoutConstraint
 		@Override
 		public boolean evaluate()
 		{
-			float b1_x = m_box1.getX();
+			return isDisjointInX() || isDisjointInY();
+		}
+
+		protected boolean isDisjointInY()
+		{
 			float b1_y = m_box1.getY();
-			float b1_w = m_box1.getWidth();
 			float b1_h = m_box1.getHeight();
-			float b2_x = m_box2.getX();
 			float b2_y = m_box2.getY();
-			float b2_w = m_box2.getWidth();
 			float b2_h = m_box2.getHeight();
-			return b1_y + b1_h <= b2_y || b2_y + b2_h <= b1_y || b1_x + b1_w <= b2_x || b2_x + b2_w <= b1_x;			
+			return b1_y + b1_h <= b2_y || b2_y + b2_h <= b1_y;
+		}
+
+		protected boolean isDisjointInX()
+		{
+			float b1_x = m_box1.getX();
+			float b1_w = m_box1.getWidth();
+			float b2_x = m_box2.getX();
+			float b2_w = m_box2.getWidth();
+			return b1_x + b1_w <= b2_x || b2_x + b2_w <= b1_x;
 		}
 
 		/**
