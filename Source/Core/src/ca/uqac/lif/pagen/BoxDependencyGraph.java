@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import ca.uqac.lif.pagen.BoxProperty.Property;
+
 public class BoxDependencyGraph
 {
 	/**
@@ -64,9 +66,10 @@ public class BoxDependencyGraph
 
 	/**
 	 * Adds a dependency between two box properties to the graph. Conceptually,
-	 * this corresponds to the creation of an edge between two nodes.
-	 * @param bp1 The first box property
-	 * @param bp2 The second box property
+	 * this corresponds to the creation of an edge between two nodes,
+	 * stating that the first property <em>is influenced by</em> the second.
+	 * @param bp1 The first box property (the one that is influenced)
+	 * @param bp2 The second box property (the one that influences)
 	 * @return This graph
 	 */
 	public BoxDependencyGraph add(BoxProperty bp1, BoxProperty bp2)
@@ -111,7 +114,8 @@ public class BoxDependencyGraph
 
 	/**
 	 * Adds a dependency between two box properties to the graph. Conceptually,
-	 * this corresponds to the creation of an edge between two nodes.
+	 * this corresponds to the creation of an edge between two nodes,
+	 * stating that the first property <em>is influenced by</em> the second.
 	 * @param b1 The first box
 	 * @param p1 The first property
 	 * @param b2 The second box
@@ -163,6 +167,10 @@ public class BoxDependencyGraph
 	/*@ pure non_null @*/ public Map<BoxProperty,Set<BoxProperty>> getTransitiveClosure(BoxProperty ... starting_points)
 	{
 		Set<BoxProperty> start_list = new HashSet<BoxProperty>();
+		if (starting_points.length == 0)
+		{
+			start_list.addAll(m_influencedBy.keySet());
+		}
 		for (BoxProperty bp : starting_points)
 		{
 			start_list.add(bp);
@@ -190,6 +198,34 @@ public class BoxDependencyGraph
 	public Set<BoxDependency> getInfluencedBy(BoxProperty bp)
 	{
 		return getInfluencedBy(bp, false);
+	}
+	
+	/**
+	 * Determines if box b1 influences box b2
+	 * @param b1 The first box
+	 * @param b2 The second box
+	 * @return {@code true} if b1 influences b2, {@code false} otherwise
+	 */
+	public boolean influences(Box b1, Box b2)
+	{
+		BoxProperty bp1 = BoxProperty.get(b1, Property.X);
+		Set<BoxDependency> deps_x = getInfluences(bp1, true);
+		for (BoxDependency bd : deps_x)
+		{
+			if (bd.getProperty().getBox().equals(b2))
+			{
+				return true;
+			}
+		}
+		Set<BoxDependency> deps_y = getInfluences(bp1, true);
+		for (BoxDependency bd : deps_y)
+		{
+			if (bd.getProperty().getBox().equals(b2))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

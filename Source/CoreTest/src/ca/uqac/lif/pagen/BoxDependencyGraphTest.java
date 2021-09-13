@@ -41,7 +41,7 @@ public class BoxDependencyGraphTest
 	protected static final Box E = new Box(0, 0, 0, 0);
 
 	@Test
-	public void test1()
+	public void testClosure1()
 	{
 		BoxDependencyGraph g = new BoxDependencyGraph();
 		g.add(B, X, A, X);
@@ -71,7 +71,7 @@ public class BoxDependencyGraphTest
 	}
 	
 	@Test
-	public void test2()
+	public void testClosure2()
 	{
 		BoxDependencyGraph g = new BoxDependencyGraph();
 		g.add(B, X, A, X);
@@ -92,7 +92,7 @@ public class BoxDependencyGraphTest
 	}
 	
 	@Test
-	public void test3()
+	public void testClosure3()
 	{
 		BoxDependencyGraph g = new BoxDependencyGraph();
 		g.add(B, X, A, X);
@@ -110,5 +110,84 @@ public class BoxDependencyGraphTest
 		{
 			assertFalse(closure.containsKey(BoxProperty.get(D, X)));
 		}
+	}
+	
+	@Test
+	public void testInfluences1()
+	{
+		BoxDependencyGraph g = new BoxDependencyGraph();
+		g.add(B, X, A, X);
+		g.add(C, X, A, X);
+		g.add(D, X, B, X);
+		g.add(E, X, B, X);
+		{
+			Set<BoxDependency> deps = g.getInfluences(BoxProperty.get(B, X));
+			assertEquals(2, deps.size());
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(D, X), BoxProperty.get(B, X))));
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(E, X), BoxProperty.get(B, X))));
+		}
+		{
+			Set<BoxDependency> deps = g.getInfluences(BoxProperty.get(D, X));
+			assertEquals(0, deps.size());
+		}
+		{
+			Set<BoxDependency> deps = g.getInfluences(BoxProperty.get(A, X));
+			assertEquals(2, deps.size());
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(B, X), BoxProperty.get(A, X))));
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(C, X), BoxProperty.get(A, X))));
+		}
+		{
+			Set<BoxDependency> deps = g.getInfluences(BoxProperty.get(A, X), true);
+			assertEquals(4, deps.size());
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(B, X), BoxProperty.get(A, X))));
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(C, X), BoxProperty.get(A, X))));
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(D, X), BoxProperty.get(B, X))));
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(E, X), BoxProperty.get(B, X))));
+		}
+	}
+	
+	@Test
+	public void testInfluencedBy1()
+	{
+		BoxDependencyGraph g = new BoxDependencyGraph();
+		g.add(B, X, A, X);
+		g.add(C, X, A, X);
+		g.add(D, X, B, X);
+		g.add(E, X, B, X);
+		{
+			Set<BoxDependency> deps = g.getInfluencedBy(BoxProperty.get(B, X));
+			assertEquals(1, deps.size());
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(B, X), BoxProperty.get(A, X))));
+		}
+		{
+			Set<BoxDependency> deps = g.getInfluencedBy(BoxProperty.get(A, X));
+			assertEquals(0, deps.size());
+		}
+		{
+			Set<BoxDependency> deps = g.getInfluencedBy(BoxProperty.get(D, X));
+			assertEquals(1, deps.size());
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(D, X), BoxProperty.get(B, X))));
+		}
+		{
+			Set<BoxDependency> deps = g.getInfluencedBy(BoxProperty.get(D, X), true);
+			assertEquals(2, deps.size());
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(D, X), BoxProperty.get(B, X))));
+			assertTrue(deps.contains(new BoxDependency(BoxProperty.get(B, X), BoxProperty.get(A, X))));
+		}
+	}
+	
+	@Test
+	public void testInfluencesBinary1()
+	{
+		BoxDependencyGraph g = new BoxDependencyGraph();
+		g.add(B, X, A, X);
+		g.add(C, X, A, X);
+		g.add(D, X, B, X);
+		g.add(E, X, B, X);
+		assertTrue(g.influences(A, B));
+		assertFalse(g.influences(B, A));
+		assertTrue(g.influences(A, C));
+		assertTrue(g.influences(B, D));
+		assertFalse(g.influences(D, E));
 	}
 }

@@ -55,7 +55,7 @@ public class HorizontalFlowLayout extends FlowLayout
 		float x = p_padding, y = p_padding, max_y = 0;
 		float bounding_w = 0, bounding_h = 0;
 		int n = 0;
-		LayoutConstraint.VerticallyAligned const_align = new LayoutConstraint.VerticallyAligned();
+		LayoutConstraint.SameY const_align = new LayoutConstraint.SameY();
 		for (int i = 0; i < children.size(); i++)
 		{
 			Box b = children.get(i);
@@ -109,7 +109,7 @@ public class HorizontalFlowLayout extends FlowLayout
 				{
 					m_constraints.add(const_align);
 				}
-				const_align = new LayoutConstraint.VerticallyAligned();
+				const_align = new LayoutConstraint.SameY();
 			}
 		}
 		if (const_align.isValid())

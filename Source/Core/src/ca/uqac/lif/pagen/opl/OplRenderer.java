@@ -25,8 +25,8 @@ import ca.uqac.lif.pagen.BoxRenderer;
 import ca.uqac.lif.pagen.LayoutConstraint;
 import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
-import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
-import ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
+import ca.uqac.lif.pagen.LayoutConstraint.SameX;
+import ca.uqac.lif.pagen.LayoutConstraint.SameY;
 
 /**
  * A renderer that prints a page as set of real variables and linear
@@ -80,13 +80,13 @@ public abstract class OplRenderer extends BoxRenderer
 	 */
 	protected void render(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ LayoutConstraint c)
 	{
-		if (c instanceof VerticallyAligned)
+		if (c instanceof SameY)
 		{
-			renderVerticallyAligned(ps, (VerticallyAligned) c);
+			renderSameY(ps, (SameY) c);
 		}
-		else if (c instanceof HorizontallyAligned)
+		else if (c instanceof SameX)
 		{
-			renderHorizontallyAligned(ps, (HorizontallyAligned) c);
+			renderSameX(ps, (SameX) c);
 		}
 		else if (c instanceof Disjoint)
 		{
@@ -122,14 +122,14 @@ public abstract class OplRenderer extends BoxRenderer
 	 * @param ps The print stream where the constraint is to be printed
 	 * @param c The constraint
 	 */
-	protected abstract void renderVerticallyAligned(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ VerticallyAligned c);
+	protected abstract void renderSameY(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ SameY c);
 	
 	/**
 	 * Renders a horizontally-aligned layout constraint.
 	 * @param ps The print stream where the constraint is to be printed
 	 * @param c The constraint
 	 */
-	protected abstract void renderHorizontallyAligned(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ HorizontallyAligned c);
+	protected abstract void renderSameX(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ SameX c);
 	
 	/**
 	 * Renders a disjointness layout constraint.

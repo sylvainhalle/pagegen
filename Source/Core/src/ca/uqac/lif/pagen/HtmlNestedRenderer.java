@@ -32,11 +32,11 @@ public class HtmlNestedRenderer extends HtmlRenderer
 	{
 		ps.print(indent);
 		String alter_class = "";
-		String title = "";
+		String title = "" + b.getId();
 		if (b.isAltered())
 		{
 			alter_class = " altered";
-			title = "Altered";
+			title += " Altered";
 		}
 		Box parent = b.getParent();
 		float parent_x = 0, parent_y = 0;

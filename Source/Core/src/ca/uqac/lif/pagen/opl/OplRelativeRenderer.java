@@ -34,8 +34,8 @@ import ca.uqac.lif.pagen.BoxProperty;
 import ca.uqac.lif.pagen.BoxProperty.Property;
 import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
-import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
-import ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
+import ca.uqac.lif.pagen.LayoutConstraint.SameX;
+import ca.uqac.lif.pagen.LayoutConstraint.SameY;
 import ca.uqac.lif.pagen.LayoutConstraint;
 
 /**
@@ -111,7 +111,7 @@ public class OplRelativeRenderer extends OplRenderer
 
 	protected final Set<LayoutConstraint> fillFaultyBoxes()
 	{
-		Map<BoxProperty,Set<LayoutConstraint>> constraint_index = LayoutConstraint.indexProperties(m_constraints);
+		Map<BoxProperty,Set<LayoutConstraint>> constraint_index = LayoutConstraint.indexProperties(m_graph, m_constraints);
 		Queue<BoxProperty> to_consider = new ArrayDeque<BoxProperty>();
 		Set<LayoutConstraint> constraints_to_consider = new HashSet<LayoutConstraint>();
 		for (LayoutConstraint c : m_constraints)
@@ -132,6 +132,10 @@ public class OplRelativeRenderer extends OplRenderer
 				continue;
 			}
 			m_faultyBoxes.add(bp);
+			if (!constraint_index.containsKey(bp))
+			{
+				continue;
+			}
 			Set<LayoutConstraint> involved_constraints = constraint_index.get(bp);
 			for (LayoutConstraint c : involved_constraints)
 			{
@@ -176,6 +180,8 @@ public class OplRelativeRenderer extends OplRenderer
 	public void render(PrintStream ps, Box root)
 	{
 		Set<LayoutConstraint> constraints_to_model = fillFaultyBoxes();
+		m_numConstraints = constraints_to_model.size();
+		System.out.print(m_constraints.size() + " vs " + constraints_to_model.size() + "; ");
 		ps.println("/****************************************");
 		ps.println(" * OPL 12.10.0.0 Model");
 		ps.println(" * Tree size:             " + root.getSize());
@@ -188,6 +194,7 @@ public class OplRelativeRenderer extends OplRenderer
 		m_wDots = filter(m_closure, Property.DW);
 		m_hDots = filter(m_closure, Property.DH);
 		m_numVariables = m_xDots.size() + m_yDots.size() + m_wDots.size() + m_hDots.size();
+		System.out.println(root.getSize() * 4 + " vs " + m_numVariables);
 		printArray(m_xDots, "xdot", ps);
 		printArray(m_yDots, "ydot", ps);
 		printArray(m_wDots, "wdot", ps);
@@ -327,39 +334,7 @@ public class OplRelativeRenderer extends OplRenderer
 	}
 
 	@Override
-	protected void renderVerticallyAligned(PrintStream ps, VerticallyAligned c)
-	{
-		Set<Box> boxes = new HashSet<Box>(c.getBoxes().size());
-		boxes.addAll(c.getBoxes());
-		Box first = null;
-		for (Box b : boxes)
-		{
-			first = b;
-			break;
-		}
-		if (first == null)
-		{
-			return;
-		}
-		boxes.remove(first);
-		if (boxes.isEmpty())
-		{
-			return;
-		}
-		BoxProperty first_property = BoxProperty.get(first, Property.X);
-		for (Box b : boxes)
-		{
-			BoxProperty other_property = BoxProperty.get(b, Property.X);
-			printTerm(ps, first_property);
-			ps.print("==");
-			printTerm(ps, other_property);
-			ps.println(";");
-			m_numConstraints++;
-		}
-	}
-
-	@Override
-	protected void renderHorizontallyAligned(PrintStream ps, HorizontallyAligned c)
+	protected void renderSameY(PrintStream ps, SameY c)
 	{
 		Set<Box> boxes = new HashSet<Box>(c.getBoxes().size());
 		boxes.addAll(c.getBoxes());
@@ -382,6 +357,38 @@ public class OplRelativeRenderer extends OplRenderer
 		for (Box b : boxes)
 		{
 			BoxProperty other_property = BoxProperty.get(b, Property.Y);
+			printTerm(ps, first_property);
+			ps.print("==");
+			printTerm(ps, other_property);
+			ps.println(";");
+			m_numConstraints++;
+		}
+	}
+
+	@Override
+	protected void renderSameX(PrintStream ps, SameX c)
+	{
+		Set<Box> boxes = new HashSet<Box>(c.getBoxes().size());
+		boxes.addAll(c.getBoxes());
+		Box first = null;
+		for (Box b : boxes)
+		{
+			first = b;
+			break;
+		}
+		if (first == null)
+		{
+			return;
+		}
+		boxes.remove(first);
+		if (boxes.isEmpty())
+		{
+			return;
+		}
+		BoxProperty first_property = BoxProperty.get(first, Property.X);
+		for (Box b : boxes)
+		{
+			BoxProperty other_property = BoxProperty.get(b, Property.X);
 			printTerm(ps, first_property);
 			ps.print("==");
 			printTerm(ps, other_property);

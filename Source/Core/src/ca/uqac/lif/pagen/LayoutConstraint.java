@@ -32,7 +32,11 @@ public abstract class LayoutConstraint
 	 * A Boolean value indicating whether the constraint is fulfilled for the
 	 * boxes it considers.
 	 */
-	Boolean m_verdict = null;
+	protected Boolean m_verdict = null;
+	
+	protected static boolean DISABLE_DISJOINT = false;
+	
+	protected static boolean DISABLE_CONTAIN = false;
 
 	/**
 	 * Creates a map from each box property to the set of all constraints
@@ -40,13 +44,13 @@ public abstract class LayoutConstraint
 	 * @param constraints The set of constraints
 	 * @return The map
 	 */
-	public static Map<BoxProperty,Set<LayoutConstraint>> indexProperties(Set<LayoutConstraint> constraints)
+	public static Map<BoxProperty,Set<LayoutConstraint>> indexProperties(BoxDependencyGraph g, Set<LayoutConstraint> constraints)
 	{
 
 		Map<BoxProperty,Set<LayoutConstraint>> constraint_index = new HashMap<BoxProperty,Set<LayoutConstraint>>();
 		for (LayoutConstraint c : constraints)
 		{
-			for (BoxProperty bp : c.getBoxProperties(null))
+			for (BoxProperty bp : c.getBoxProperties(g))
 			{
 				Set<LayoutConstraint> set = null;
 				if (constraint_index.containsKey(bp))
@@ -330,12 +334,16 @@ public abstract class LayoutConstraint
 		}
 	}
 
-	public static class HorizontallyAligned extends MultiLayoutConstraint
+	/**
+	 * Constraint stating that a set of elements all have the same "x"
+	 * (horizontal) coordinate.
+	 */
+	public static class SameX extends MultiLayoutConstraint
 	{
 		@Override
 		protected String getName()
 		{
-			return "Horizontally aligned: ";
+			return "Same X: ";
 		}
 
 		@Override
@@ -353,7 +361,7 @@ public abstract class LayoutConstraint
 		@Override
 		public boolean equals(Object o)
 		{
-			if (o == null || !(o instanceof HorizontallyAligned))
+			if (o == null || !(o instanceof SameX))
 			{
 				return false;
 			}
@@ -373,60 +381,10 @@ public abstract class LayoutConstraint
 			{
 				if (!b.equals(current))
 				{
-					props.add(BoxProperty.get(b, BoxProperty.Property.Y));
+					props.add(BoxProperty.get(b, BoxProperty.Property.X));
 				}
 			}
 			return props;
-		}
-
-		@Override
-		public boolean evaluate()
-		{
-			Box first = null;
-			for (Box b : m_boxes)
-			{
-				if (first == null)
-				{
-					first = b;
-					continue;
-				}
-				if (first.getY() != b.getY())
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-	}
-
-	public static class VerticallyAligned extends MultiLayoutConstraint
-	{
-		@Override
-		protected String getName()
-		{
-			return "Vertically aligned: ";
-		}
-
-		@Override
-		protected boolean isValid()
-		{
-			return m_boxes.size() >= 2;
-		}
-
-		@Override
-		public int hashCode()
-		{
-			return super.hashCode() + 5;
-		}
-
-		@Override
-		public boolean equals(Object o)
-		{
-			if (o == null || !(o instanceof VerticallyAligned))
-			{
-				return false;
-			}
-			return super.equals(o);
 		}
 
 		@Override
@@ -447,6 +405,60 @@ public abstract class LayoutConstraint
 			}
 			return true;
 		}
+	}
+
+	/**
+	 * Constraint stating that a set of elements all have the same "y"
+	 * (vertical) coordinate.
+	 */
+	public static class SameY extends MultiLayoutConstraint
+	{
+		@Override
+		protected String getName()
+		{
+			return "Same Y: ";
+		}
+
+		@Override
+		protected boolean isValid()
+		{
+			return m_boxes.size() >= 2;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return super.hashCode() + 5;
+		}
+
+		@Override
+		public boolean equals(Object o)
+		{
+			if (o == null || !(o instanceof SameY))
+			{
+				return false;
+			}
+			return super.equals(o);
+		}
+
+		@Override
+		public boolean evaluate()
+		{
+			Box first = null;
+			for (Box b : m_boxes)
+			{
+				if (first == null)
+				{
+					first = b;
+					continue;
+				}
+				if (first.getY() != b.getY())
+				{
+					return false;
+				}
+			}
+			return true;
+		}
 
 		@Override
 		public Set<BoxProperty> getBoxProperties(BoxDependencyGraph g, BoxProperty bp)
@@ -461,7 +473,7 @@ public abstract class LayoutConstraint
 			{
 				if (!b.equals(current))
 				{
-					props.add(BoxProperty.get(b, BoxProperty.Property.X));
+					props.add(BoxProperty.get(b, BoxProperty.Property.Y));
 				}
 			}
 			return props;
@@ -501,75 +513,111 @@ public abstract class LayoutConstraint
 		public Set<BoxProperty> getBoxProperties(BoxDependencyGraph g, BoxProperty bp)
 		{
 			Set<BoxProperty> props = new HashSet<BoxProperty>();
+			if (DISABLE_DISJOINT)
+				return props;
+			boolean b1_influ_b2 = g.influences(m_box1, m_box2);
+			boolean b2_influ_b1 = g.influences(m_box2, m_box1);
 			if (bp == null)
 			{
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
-				return props;
-			}
-			boolean first = m_box1.equals(bp.getBox());
-			Set<BoxDependency> deps = g.getInfluences(bp);
-			// Checks if the two boxes influence each other
-			for (BoxDependency bd : deps)
-			{
-				if (first)
+				if (b1_influ_b2)
 				{
-					if (bd.getProperty().getBox().equals(m_box2))
-					{
-						return props;
-					}
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+					props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
+					props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
+					props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+					props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+				}
+				else if (b2_influ_b1)
+				{
+					props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+					props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
 				}
 				else
 				{
-					if (bd.getProperty().getBox().equals(m_box1))
-					{
-						return props;
-					}
+					// Everything is fair game
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+					props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
+					props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
+					props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+					props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
 				}
+				return props;
 			}
+			boolean first = m_box1.equals(bp.getBox());
 			switch (bp.getProperty())
 			{
 			case X:
 			case W:
 				if (first)
 				{
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+					// box1 is moved
+					if (b1_influ_b2)
+					{
+						// box1 influences box2: nothing to do
+					}
+					else
+					{
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+					}
 				}
 				else
 				{
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+					// box2 is moved
+					if (b1_influ_b2)
+					{
+						// box2 influences box1: nothing to do
+					}
+					else
+					{
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+					}
 				}
 				break;
 			case Y:
 			case H:
 				if (first)
 				{
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+					// box1 is moved
+					if (b1_influ_b2)
+					{
+						// box1 influences box2: nothing to do
+					}
+					else
+					{
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+					}
 				}
 				else
 				{
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+					// box2 is moved
+					if (b1_influ_b2)
+					{
+						// box2 influences box1: nothing to do
+					}
+					else
+					{
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+					}
 				}
 				break;
 			default:
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+				// Not supposed to happen
 			}
 			return props;
 		}
@@ -661,83 +709,127 @@ public abstract class LayoutConstraint
 		public Set<BoxProperty> getBoxProperties(BoxDependencyGraph g, BoxProperty bp)
 		{
 			Set<BoxProperty> props = new HashSet<BoxProperty>();
+			if (DISABLE_CONTAIN)
+				return props;
+			boolean b1_influ_b2 = g.influences(m_box1, m_box2);
 			if (bp == null)
 			{
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
 				props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
 				props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+				if (!b1_influ_b2)
+				{
+					// box1 does not influence box2, so moving it may matter
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
+				}
+				// We don't do anything to b2
 				return props;
 			}
 			boolean first = m_box1.equals(bp.getBox());
-			Set<BoxDependency> deps = g.getInfluences(bp);
-			// Checks if the two boxes influence each other
-			for (BoxDependency bd : deps)
+			switch (bp.getProperty())
 			{
+			case X:
 				if (first)
 				{
-					if (bd.getProperty().getBox().equals(m_box2))
+					// box1 is moved on the x-axis
+					if (b1_influ_b2)
 					{
-						return props;
+						// box1 influences box2, so box2 will move by itself
+					}
+					else
+					{
+						// may need to shift box2
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
 					}
 				}
 				else
 				{
-					if (bd.getProperty().getBox().equals(m_box1))
+					// box2 is moved on the x-axis
+					if (b1_influ_b2)
 					{
-						return props;
+						// box1 influences box2, so box1 will adjust by itself
 					}
-				}
-			}
-			switch (bp.getProperty())
-			{
-			case X:
-				if (!first)
-				{
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+					else
+					{
+						// may need to widen box1
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+					}
 				}
 				break;
 			case W:
 				if (first)
 				{
+					// box1 is resized; may need to resize box2
 					props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
+					if (!b1_influ_b2)
+					{
+						// box1 does not influence box2; may need to move box2
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
+					}
 				}
 				else
 				{
+					// box2 is resized; may need to resize box1
 					props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+					if (!b1_influ_b2)
+					{
+						// box1 does not influence box2; may need to move box2
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
+					}
 				}
 				break;
 			case Y:
-				if (!first)
+				if (first)
 				{
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+					// box1 is moved on the y-axis
+					if (b1_influ_b2)
+					{
+						// box1 influences box2, so box2 will move by itself
+					}
+					else
+					{
+						// may need to shift box2
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
+					}
+				}
+				else
+				{
+					// box2 is moved on the y-axis
+					if (b1_influ_b2)
+					{
+						// box1 influences box2, so box1 will adjust by itself
+					}
+					else
+					{
+						// may need to increase box1's height
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+					}
 				}
 				break;
 			case H:
 				if (first)
 				{
-					props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
+					// box1 is resized; may need to resize box2
 					props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+					if (!b1_influ_b2)
+					{
+						// box1 does not influence box2; may need to move box2
+						props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
+					}
 				}
 				else
 				{
-					props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+					// box2 is resized; may need to resize box1
+					props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
+					if (!b1_influ_b2)
+					{
+						// box1 does not influence box2; may need to move box2
+						props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
+					}
 				}
 				break;
 			default:
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.X));
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.Y));
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.W));
-				props.add(BoxProperty.get(m_box1, BoxProperty.Property.H));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.X));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.Y));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.W));
-				props.add(BoxProperty.get(m_box2, BoxProperty.Property.H));
+				// Not supposed to happen
 			}
 			return props;
 		}

@@ -28,8 +28,8 @@ import ca.uqac.lif.pagen.Box;
 import ca.uqac.lif.pagen.LayoutConstraint;
 import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
-import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
-import ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
+import ca.uqac.lif.pagen.LayoutConstraint.SameX;
+import ca.uqac.lif.pagen.LayoutConstraint.SameY;
 
 /**
  * Produces a file in the OPL format based on a tree of nested boxes.
@@ -193,7 +193,7 @@ public class OplAbsoluteRenderer extends OplRenderer
 	}
 
 	@Override
-	protected void renderVerticallyAligned(PrintStream ps, VerticallyAligned c)
+	protected void renderSameY(PrintStream ps, SameY c)
 	{
 		Set<Box> boxes = new HashSet<Box>(c.getBoxes().size());
 		boxes.addAll(c.getBoxes());
@@ -220,7 +220,7 @@ public class OplAbsoluteRenderer extends OplRenderer
 	}
 
 	@Override
-	protected void renderHorizontallyAligned(PrintStream ps, HorizontallyAligned c)
+	protected void renderSameX(PrintStream ps, SameX c)
 	{
 		Set<Box> boxes = new HashSet<Box>(c.getBoxes().size());
 		boxes.addAll(c.getBoxes());

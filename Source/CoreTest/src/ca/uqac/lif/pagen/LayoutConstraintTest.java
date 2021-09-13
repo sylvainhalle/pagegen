@@ -24,8 +24,8 @@ import java.util.Set;
 import org.junit.Test;
 
 import ca.uqac.lif.pagen.BoxProperty.Property;
-import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
-import ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
+import ca.uqac.lif.pagen.LayoutConstraint.SameX;
+import ca.uqac.lif.pagen.LayoutConstraint.SameY;
 
 public class LayoutConstraintTest
 {
@@ -34,7 +34,7 @@ public class LayoutConstraintTest
 	{
 		Box B = new Box(10, 8, 30, 30);
 		Box C = new Box(50, 8, 20, 20);
-		LayoutConstraint va = new VerticallyAligned().add(B).add(C);
+		LayoutConstraint va = new SameY().add(B).add(C);
 		assertFalse(va.getVerdict());
 		BoxDependencyGraph g = new BoxDependencyGraph();
 		Set<BoxProperty> set = va.getBoxProperties(g, BoxProperty.get(B, Property.X));
@@ -46,7 +46,7 @@ public class LayoutConstraintTest
 	{
 		Box B = new Box(10, 8, 30, 30);
 		Box C = new Box(50, 8, 20, 20);
-		LayoutConstraint va = new HorizontallyAligned().add(B).add(C);
+		LayoutConstraint va = new SameX().add(B).add(C);
 		assertTrue(va.getVerdict());
 		BoxDependencyGraph g = new BoxDependencyGraph();
 		Set<BoxProperty> set = va.getBoxProperties(g, BoxProperty.get(B, Property.Y));

@@ -189,8 +189,8 @@ public class Main
 				if (!arg_map.hasOption("flat"))
 				{
 					g.add(hfl_1.getDependencies());
-					//g.add(hfl_2.getDependencies());
-					//g.add(vfl_1.getDependencies());
+					g.add(hfl_2.getDependencies());
+					g.add(vfl_1.getDependencies());
 				}
 				((OplRelativeRenderer) renderer).setDependencyGraph(g);
 			}

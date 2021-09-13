@@ -33,8 +33,8 @@ import ca.uqac.lif.pagen.LayoutConstraint;
 
 import static ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import static ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
-import static ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
-import static ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
+import static ca.uqac.lif.pagen.LayoutConstraint.SameX;
+import static ca.uqac.lif.pagen.LayoutConstraint.SameY;
 
 public class OplRelativeRendererTest
 {
@@ -55,7 +55,7 @@ public class OplRelativeRendererTest
 		g.add(D, X, B, X);
 		g.add(E, X, B, X);
 		Set<LayoutConstraint> constraints = new HashSet<LayoutConstraint>();
-		LayoutConstraint va = new HorizontallyAligned().add(B).add(C);
+		LayoutConstraint va = new SameX().add(B).add(C);
 		constraints.add(va);
 		constraints.add(new Disjoint(C, E));
 		OplRelativeRenderer renderer = new OplRelativeRenderer(constraints);
