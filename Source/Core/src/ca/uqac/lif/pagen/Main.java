@@ -28,6 +28,7 @@ import ca.uqac.lif.pagen.CliParser.Argument;
 import ca.uqac.lif.pagen.CliParser.ArgumentMap;
 import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
+import ca.uqac.lif.pagen.opl.DependencyGraphRenderer;
 import ca.uqac.lif.pagen.opl.OplAbsoluteRenderer;
 import ca.uqac.lif.pagen.opl.OplRelativeRenderer;
 import ca.uqac.lif.synthia.Picker;
@@ -176,7 +177,6 @@ public class Main
 		else if (type.compareToIgnoreCase("opl") == 0)
 		{
 			Set<LayoutConstraint> constraints = new HashSet<LayoutConstraint>();
-			Set<LayoutConstraint> violated = new HashSet<LayoutConstraint>();
 			constraints.addAll(hfl_1.getConstraints());
 			constraints.addAll(hfl_2.getConstraints());
 			constraints.addAll(vfl_1.getConstraints());
@@ -184,7 +184,14 @@ public class Main
 			constraints.addAll(Disjoint.addContainmentConstraints(b));
 			if (arg_map.hasOption("relative"))
 			{
-				renderer = new OplRelativeRenderer(constraints);
+				if (arg_map.hasOption("show-deps"))
+				{
+					renderer = new DependencyGraphRenderer(constraints);
+				}
+				else
+				{
+					renderer = new OplRelativeRenderer(constraints);
+				}
 				BoxDependencyGraph g = new BoxDependencyGraph();
 				if (!arg_map.hasOption("flat"))
 				{
@@ -192,6 +199,7 @@ public class Main
 					g.add(hfl_2.getDependencies());
 					g.add(vfl_1.getDependencies());
 				}
+				
 				((OplRelativeRenderer) renderer).setDependencyGraph(g);
 			}
 			else
@@ -228,6 +236,7 @@ public class Main
 		CliParser parser = new CliParser();
 		parser.addArgument(new Argument().withLongName("type").withShortName("t").withArgument("x").withDescription("\tOutput file of type x (html, dot, opl)"));
 		parser.addArgument(new Argument().withLongName("relative").withShortName("r").withDescription("\tUse relative encoding for OPL"));
+		parser.addArgument(new Argument().withLongName("show-deps").withShortName("h").withDescription("\tPrint dependency graph"));
 		parser.addArgument(new Argument().withLongName("seed").withShortName("s").withArgument("x").withDescription("\tInitialize RNG with seed s"));
 		parser.addArgument(new Argument().withLongName("misalign").withShortName("m").withArgument("x").withDescription("\tSet misalignment probability to p (in [0,1])"));
 		parser.addArgument(new Argument().withLongName("overlap").withShortName("l").withArgument("x").withDescription("\tSet overlap probability to p (in [0,1])"));

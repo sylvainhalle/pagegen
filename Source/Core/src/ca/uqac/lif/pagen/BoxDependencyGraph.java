@@ -63,6 +63,15 @@ public class BoxDependencyGraph
 		}
 		return this;
 	}
+	
+	/**
+	 * Gets the set of all box properties represented in this graph.
+	 * @return The set of properties
+	 */
+	public Set<BoxProperty> getNodes()
+	{
+		return m_influencedBy.keySet();
+	}
 
 	/**
 	 * Adds a dependency between two box properties to the graph. Conceptually,
