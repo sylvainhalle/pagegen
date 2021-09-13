@@ -181,7 +181,7 @@ public class OplRelativeRenderer extends OplRenderer
 	{
 		Set<LayoutConstraint> constraints_to_model = fillFaultyBoxes();
 		m_numConstraints = constraints_to_model.size();
-		System.out.print(m_constraints.size() + " vs " + constraints_to_model.size() + "; ");
+		//System.out.print(m_constraints.size() + " vs " + constraints_to_model.size() + "; ");
 		ps.println("/****************************************");
 		ps.println(" * OPL 12.10.0.0 Model");
 		ps.println(" * Tree size:             " + root.getSize());
@@ -194,7 +194,7 @@ public class OplRelativeRenderer extends OplRenderer
 		m_wDots = filter(m_closure, Property.DW);
 		m_hDots = filter(m_closure, Property.DH);
 		m_numVariables = m_xDots.size() + m_yDots.size() + m_wDots.size() + m_hDots.size();
-		System.out.println(root.getSize() * 4 + " vs " + m_numVariables);
+		//System.out.println(root.getSize() * 4 + " vs " + m_numVariables);
 		printArray(m_xDots, "xdot", ps);
 		printArray(m_yDots, "ydot", ps);
 		printArray(m_wDots, "wdot", ps);
