@@ -18,18 +18,20 @@
 package ca.uqac.lif.pagen.opl;
 
 import java.io.PrintStream;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import ca.uqac.lif.pagen.Box;
+import ca.uqac.lif.pagen.BoxDependency;
 import ca.uqac.lif.pagen.BoxDependencyGraph;
 import ca.uqac.lif.pagen.BoxProperty;
 import ca.uqac.lif.pagen.BoxProperty.Property;
-import ca.uqac.lif.pagen.LayoutConstraint.BinaryLayoutConstraint;
 import ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
 import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
@@ -57,7 +59,7 @@ public class OplRelativeRenderer extends OplRenderer
 	 * The set of boxes properties that are directly involved in a constraint
 	 * violation.
 	 */
-	protected Set<BoxProperty> m_faultyBoxes;
+	/*@ non_null @*/ protected Set<BoxProperty> m_faultyBoxes;
 
 	/**
 	 * The list of box properties referring to the x-shift.
@@ -90,7 +92,6 @@ public class OplRelativeRenderer extends OplRenderer
 	{
 		super(constraints);
 		m_faultyBoxes = new HashSet<BoxProperty>();
-		fillFaultyBoxes(constraints);
 	}
 
 	/**
@@ -107,52 +108,57 @@ public class OplRelativeRenderer extends OplRenderer
 		}
 		return this;
 	}
-	
-	@SafeVarargs
-	protected final void fillFaultyBoxes(Set<LayoutConstraint> ... constraints)
+
+	protected final Set<LayoutConstraint> fillFaultyBoxes()
 	{
-		for (Set<LayoutConstraint> set : constraints)
+		Map<BoxProperty,Set<LayoutConstraint>> constraint_index = LayoutConstraint.indexProperties(m_constraints);
+		Queue<BoxProperty> to_consider = new ArrayDeque<BoxProperty>();
+		Set<LayoutConstraint> constraints_to_consider = new HashSet<LayoutConstraint>();
+		for (LayoutConstraint c : m_constraints)
 		{
-			for (LayoutConstraint c : set)
+			if (!c.getVerdict())
 			{
-				if (c instanceof VerticallyAligned)
+				constraints_to_consider.add(c);
+				Set<BoxProperty> bps = c.getBoxProperties(m_graph);
+				to_consider.addAll(bps);
+			}
+		}
+		// Loop through box properties
+		while (!to_consider.isEmpty())
+		{
+			BoxProperty bp = to_consider.remove();
+			if (m_faultyBoxes.contains(bp))
+			{
+				continue;
+			}
+			m_faultyBoxes.add(bp);
+			Set<LayoutConstraint> involved_constraints = constraint_index.get(bp);
+			for (LayoutConstraint c : involved_constraints)
+			{
+				Set<BoxProperty> new_properties = c.getBoxProperties(m_graph, bp);
+				if (!new_properties.isEmpty())
 				{
-					VerticallyAligned va = (VerticallyAligned) c;
-					for (Box b : va.getBoxes())
+					constraints_to_consider.add(c);
+					for (BoxProperty new_bp : new_properties)
 					{
-						BoxProperty bp = BoxProperty.get(b, Property.X);
-						m_faultyBoxes.add(bp);
-					}
-				}
-				if (c instanceof HorizontallyAligned)
-				{
-					HorizontallyAligned va = (HorizontallyAligned) c;
-					for (Box b : va.getBoxes())
-					{
-						BoxProperty bp = BoxProperty.get(b, Property.Y);
-						m_faultyBoxes.add(bp);
-					}
-				}
-				if (c instanceof BinaryLayoutConstraint) // Contained and Disjoint
-				{
-					BinaryLayoutConstraint va = (BinaryLayoutConstraint) c;
-					{
-						Box b = va.getFirstBox();
-						m_faultyBoxes.add(BoxProperty.get(b, Property.X));
-						m_faultyBoxes.add(BoxProperty.get(b, Property.Y));
-						m_faultyBoxes.add(BoxProperty.get(b, Property.W));
-						m_faultyBoxes.add(BoxProperty.get(b, Property.H));
-					}
-					{
-						Box b = va.getSecondBox();
-						m_faultyBoxes.add(BoxProperty.get(b, Property.X));
-						m_faultyBoxes.add(BoxProperty.get(b, Property.Y));
-						m_faultyBoxes.add(BoxProperty.get(b, Property.W));
-						m_faultyBoxes.add(BoxProperty.get(b, Property.H));
+						if (!m_faultyBoxes.contains(new_bp) && !to_consider.contains(new_bp))
+						{
+							to_consider.add(new_bp);
+						}
 					}
 				}
 			}
+			Set<BoxDependency> new_dependencies = m_graph.getInfluences(bp);
+			for (BoxDependency bd : new_dependencies)
+			{
+				BoxProperty new_bp = bd.getProperty();
+				if (!m_faultyBoxes.contains(new_bp) && !to_consider.contains(new_bp))
+				{
+					to_consider.add(new_bp);
+				}
+			}
 		}
+		return constraints_to_consider;
 	}
 
 	/**
@@ -169,20 +175,23 @@ public class OplRelativeRenderer extends OplRenderer
 	@Override
 	public void render(PrintStream ps, Box root)
 	{
+		Set<LayoutConstraint> constraints_to_model = fillFaultyBoxes();
 		ps.println("/****************************************");
 		ps.println(" * OPL 12.10.0.0 Model");
 		ps.println(" * Tree size:             " + root.getSize());
 		ps.println(" * Tree depth:            " + root.getDepth());
+		ps.println(" * Relative modeling");
 		ps.println("****************************************/");
 		m_closure = m_graph.getTransitiveClosure(m_faultyBoxes);
 		m_xDots = filter(m_closure, Property.DX);
 		m_yDots = filter(m_closure, Property.DY);
 		m_wDots = filter(m_closure, Property.DW);
 		m_hDots = filter(m_closure, Property.DH);
+		m_numVariables = m_xDots.size() + m_yDots.size() + m_wDots.size() + m_hDots.size();
 		printArray(m_xDots, "xdot", ps);
 		printArray(m_yDots, "ydot", ps);
-		printArray(m_wDots, "hdot", ps);
-		printArray(m_hDots, "wdot", ps);
+		printArray(m_wDots, "wdot", ps);
+		printArray(m_hDots, "hdot", ps);
 		ps.println("execute");		
 		ps.println("{");
 		ps.println("cplex.tilim=1000;");	
@@ -190,7 +199,7 @@ public class OplRelativeRenderer extends OplRenderer
 		ps.println("}");
 		ps.println(s_objectiveFunction);
 		ps.println("subject to {");
-		for (LayoutConstraint lc : m_constraints)
+		for (LayoutConstraint lc : constraints_to_model)
 		{
 			render(ps, lc);
 		}
@@ -274,8 +283,11 @@ public class OplRelativeRenderer extends OplRenderer
 		{
 			for (BoxProperty bp : terms)
 			{
-				ps.print("+");
-				printProperty(ps, bp);
+				if (m_faultyBoxes.contains(bp.getAbsolute()))
+				{
+					ps.print("+");
+					printProperty(ps, bp);
+				}
 			}
 		}
 		ps.print(")");
@@ -342,6 +354,7 @@ public class OplRelativeRenderer extends OplRenderer
 			ps.print("==");
 			printTerm(ps, other_property);
 			ps.println(";");
+			m_numConstraints++;
 		}
 	}
 
@@ -373,6 +386,7 @@ public class OplRelativeRenderer extends OplRenderer
 			ps.print("==");
 			printTerm(ps, other_property);
 			ps.println(";");
+			m_numConstraints++;
 		}
 	}
 
@@ -417,6 +431,7 @@ public class OplRelativeRenderer extends OplRenderer
 		ps.print(" <= ");
 		printTerm(ps, b1_x);
 		ps.println(";");
+		m_numConstraints++;
 	}
 
 	@Override
@@ -460,5 +475,6 @@ public class OplRelativeRenderer extends OplRenderer
 		ps.print("+");
 		printTerm(ps, b2_w);
 		ps.println(";");
+		m_numConstraints += 4;
 	}
 }

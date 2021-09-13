@@ -1,17 +1,17 @@
 /*
     A random DOM tree generator
     Copyright (C) 2020-2021 Sylvain Hallé
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published
     by the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -30,17 +30,24 @@ public class BoxDependencyGraph
 	 * A map that associates box properties to the downstream dependencies
 	 * it is associated to.
 	 */
-	protected Map<BoxProperty,Set<BoxDependency>> m_dependencies;
-	
+	protected Map<BoxProperty,Set<BoxDependency>> m_influencedBy;
+
+	/**
+	 * A map that associates box properties to the downstream dependencies
+	 * it is associated to.
+	 */
+	protected Map<BoxProperty,Set<BoxDependency>> m_influences;
+
 	/**
 	 * Creates a new empty box dependency graph.
 	 */
 	public BoxDependencyGraph()
 	{
 		super();
-		m_dependencies = new HashMap<BoxProperty,Set<BoxDependency>>();
+		m_influencedBy = new HashMap<BoxProperty,Set<BoxDependency>>();
+		m_influences = new HashMap<BoxProperty,Set<BoxDependency>>();
 	}
-	
+
 	/**
 	 * Adds a set of dependencies to the graph.
 	 * @param dependencies The set of dependencies
@@ -54,7 +61,7 @@ public class BoxDependencyGraph
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Adds a dependency between two box properties to the graph. Conceptually,
 	 * this corresponds to the creation of an edge between two nodes.
@@ -64,24 +71,44 @@ public class BoxDependencyGraph
 	 */
 	public BoxDependencyGraph add(BoxProperty bp1, BoxProperty bp2)
 	{
-		Set<BoxDependency> deps = null;
-		if (m_dependencies.containsKey(bp1))
+		BoxDependency bd = new BoxDependency(bp1, bp2);
 		{
-			deps = m_dependencies.get(bp1);
+			Set<BoxDependency> deps = null;
+			if (m_influencedBy.containsKey(bp1))
+			{
+				deps = m_influencedBy.get(bp1);
+			}
+			else
+			{
+				deps = new HashSet<BoxDependency>();
+				m_influencedBy.put(bp1, deps);
+			}
+			deps.add(bd);
+			if (!m_influencedBy.containsKey(bp2))
+			{
+				m_influencedBy.put(bp2, new HashSet<BoxDependency>());
+			}
 		}
-		else
 		{
-			deps = new HashSet<BoxDependency>();
-			m_dependencies.put(bp1, deps);
-		}
-		deps.add(new BoxDependency(bp1, bp2));
-		if (!m_dependencies.containsKey(bp2))
-		{
-			m_dependencies.put(bp2, new HashSet<BoxDependency>());
+			Set<BoxDependency> deps = null;
+			if (m_influences.containsKey(bp2))
+			{
+				deps = m_influences.get(bp2);
+			}
+			else
+			{
+				deps = new HashSet<BoxDependency>();
+				m_influences.put(bp2, deps);
+			}
+			deps.add(bd);
+			if (!m_influences.containsKey(bp1))
+			{
+				m_influences.put(bp1, new HashSet<BoxDependency>());
+			}
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Adds a dependency between two box properties to the graph. Conceptually,
 	 * this corresponds to the creation of an edge between two nodes.
@@ -95,28 +122,10 @@ public class BoxDependencyGraph
 	{
 		return add(BoxProperty.get(b1, p1), BoxProperty.get(b2, p2));
 	}
-	
-	/**
-	 * Gets the set of downstream dependencies for a given box property.
-	 * @param bp The box property
-	 * @return The set of other box dependencies
-	 */
-	/*@ non_null @*/ public Set<BoxDependency> getDependencies(BoxProperty bp)
-	{
-		if (m_dependencies.containsKey(bp))
-		{
-			return m_dependencies.get(bp);
-		}
-		return new HashSet<BoxDependency>(0);
-	}
-	
+
 	/*@ pure non_null @*/ public Map<BoxProperty,Set<BoxProperty>> getTransitiveClosure(Set<BoxProperty> start_list)
 	{
 		Map<BoxProperty,Set<BoxProperty>> mapping = new HashMap<BoxProperty,Set<BoxProperty>>();
-		if (start_list.isEmpty())
-		{
-			start_list.addAll(m_dependencies.keySet());
-		}
 		for (BoxProperty start : start_list)
 		{
 			Set<BoxProperty> visited = new HashSet<BoxProperty>();
@@ -131,8 +140,11 @@ public class BoxDependencyGraph
 					continue;
 				}
 				visited.add(bp);
-				deps.add(bp.getDelta());
-				Set<BoxDependency> children = getDependencies(bp);
+				//if (start_list.contains(bp))
+				{
+					deps.add(bp.getDelta());
+				}
+				Set<BoxDependency> children = getInfluencedBy(bp);
 				for (BoxDependency bd : children)
 				{
 					BoxProperty child_bp = bd.getInfluencedBy();
@@ -147,7 +159,7 @@ public class BoxDependencyGraph
 		}
 		return mapping;
 	}
-	
+
 	/*@ pure non_null @*/ public Map<BoxProperty,Set<BoxProperty>> getTransitiveClosure(BoxProperty ... starting_points)
 	{
 		Set<BoxProperty> start_list = new HashSet<BoxProperty>();
@@ -157,7 +169,7 @@ public class BoxDependencyGraph
 		}
 		return getTransitiveClosure(start_list);
 	}
-	
+
 	/**
 	 * Gets the set of downstream dependencies for a given box and a given
 	 * property. 
@@ -167,11 +179,108 @@ public class BoxDependencyGraph
 	 */
 	/*@ pure non_null @*/ public Set<BoxDependency> getDependencies(Box b, BoxProperty.Property p)
 	{
-		BoxProperty bp1 = BoxProperty.get(b, p);
-		if (m_dependencies.containsKey(bp1))
+		return getInfluencedBy(BoxProperty.get(b, p));
+	}
+	
+	/**
+	 * Gets the set of dependencies that influence a given box property.
+	 * @param b The box property
+	 * @return The set of other box dependencies
+	 */
+	public Set<BoxDependency> getInfluencedBy(BoxProperty bp)
+	{
+		return getInfluencedBy(bp, false);
+	}
+
+	/**
+	 * Gets the set of dependencies that influence a given box property.
+	 * @param b The box property
+	 * @param transitive Set to {@code true} to perform a transitive scan
+	 * @return The set of other box properties
+	 */
+	public Set<BoxDependency> getInfluencedBy(BoxProperty bp, boolean transitive)
+	{
+		if (!transitive)
 		{
-			return m_dependencies.get(bp1);
+			if (m_influencedBy.containsKey(bp))
+			{
+				return m_influencedBy.get(bp);
+			}
+			return new HashSet<BoxDependency>(0);
 		}
-		return new HashSet<BoxDependency>(0);
+		Set<BoxDependency> out = new HashSet<BoxDependency>();
+		Queue<BoxDependency> to_visit = new ArrayDeque<BoxDependency>();
+		Box start_box = bp.getBox();
+		if (m_influencedBy.containsKey(bp))
+		{
+			to_visit.addAll(m_influencedBy.get(bp));
+		}
+		while (!to_visit.isEmpty())
+		{
+			BoxDependency bd_current = to_visit.remove();
+			if (out.contains(bd_current))
+			{
+				continue;
+			}
+			out.add(bd_current);
+			BoxProperty bp_target = bd_current.getInfluencedBy();
+			if (!bp_target.getBox().equals(start_box) && m_influencedBy.containsKey(bp_target))
+			{
+				to_visit.addAll(m_influencedBy.get(bp_target));
+			}
+		}
+		return out;
+	}
+	
+	/**
+	 * Gets the set of dependencies that are influenced by a given box
+	 * property.
+	 * @param b The box property
+	 * @return The set of other box dependencies
+	 */
+	public Set<BoxDependency> getInfluences(BoxProperty bp)
+	{
+		return getInfluences(bp, false);
+	}
+
+	/**
+	 * Gets the set of box properties that are influenced by a given box
+	 * property.
+	 * @param b The box property
+	 * @param transitive Set to {@code true} to perform a transitive scan
+	 * @return The set of other box properties
+	 */
+	public Set<BoxDependency> getInfluences(BoxProperty bp, boolean transitive)
+	{
+		if (!transitive)
+		{
+			if (m_influences.containsKey(bp))
+			{
+				return m_influences.get(bp);
+			}
+			return new HashSet<BoxDependency>(0);
+		}
+		Set<BoxDependency> out = new HashSet<BoxDependency>();
+		Queue<BoxDependency> to_visit = new ArrayDeque<BoxDependency>();
+		Box start_box = bp.getBox();
+		if (m_influences.containsKey(bp))
+		{
+			to_visit.addAll(m_influences.get(bp));
+		}
+		while (!to_visit.isEmpty())
+		{
+			BoxDependency bd_current = to_visit.remove();
+			if (out.contains(bd_current))
+			{
+				continue;
+			}
+			out.add(bd_current);
+			BoxProperty bp_target = bd_current.getProperty();
+			if (!bp_target.getBox().equals(start_box) && m_influences.containsKey(bp_target))
+			{
+				to_visit.addAll(m_influences.get(bp_target));
+			}
+		}
+		return out;
 	}
 }

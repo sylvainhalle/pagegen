@@ -26,28 +26,34 @@ import ca.uqac.lif.synthia.util.Constant;
 public abstract class FlowLayout implements LayoutManager
 {
 	/**
-	 * A set of constraints produced by the layout manager
+	 * A set of constraints produced by the layout manager.
 	 */
 	protected Set<LayoutConstraint> m_constraints;
 	
 	/**
-	 * A set of constraints produced by the layout manager
+	 * A subset of the constraints that are purposefully violated by the layout
+	 * manager.
+	 */
+	protected Set<LayoutConstraint> m_violatedConstraints;
+	
+	/**
+	 * A set of constraints produced by the layout manager.
 	 */
 	protected Set<BoxDependency> m_dependencies;
 	
 	/**
 	 * The maximum number of elements to flow before moving to the
-	 * next line
+	 * next line.
 	 */
 	protected Picker<Integer> m_maxElements;
 	
 	/**
-	 * A coin toss deciding if an element should be misaligned on purpose
+	 * A coin toss deciding if an element should be misaligned on purpose.
 	 */
 	protected Picker<Boolean> m_injectAlignementFault = new Constant<Boolean>(false);
 	
 	/**
-	 * A picker deciding by how much to misalign an element
+	 * A picker deciding by how much to misalign an element.
 	 */
 	protected Picker<Integer> m_shiftPicker = new Constant<Integer>(0);
 	
@@ -175,6 +181,12 @@ public abstract class FlowLayout implements LayoutManager
 	public Set<LayoutConstraint> getConstraints()
 	{
 		return m_constraints;
+	}
+	
+	@Override
+	public Set<LayoutConstraint> getViolatedConstraints()
+	{
+		return m_violatedConstraints;
 	}
 	
 	@Override

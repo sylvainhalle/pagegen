@@ -20,8 +20,10 @@ package ca.uqac.lif.pagen;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Box implements Comparable<Box>
 {
@@ -96,6 +98,25 @@ public class Box implements Comparable<Box>
 	{
 		super();
 		m_id = s_idCount++;
+		m_x = x;
+		m_y = y;
+		m_width = w;
+		m_height = h;
+		m_children = new ArrayList<Box>();
+		m_padding = 0;
+	}
+	
+	/**
+	 * Creates a new box with given position and dimensions.
+	 * @param x The <i>x</i> position of the top-left corner of this box
+	 * @param y The <i>y</i> position of the top-left corner of this box
+	 * @param w The width of this box
+	 * @param h The height of this box
+	 */
+	private Box(int id, float x, float y, float w, float h)
+	{
+		super();
+		m_id = id;
 		m_x = x;
 		m_y = y;
 		m_width = w;
@@ -329,5 +350,62 @@ public class Box implements Comparable<Box>
 	public int compareTo(Box b)
 	{
 		return m_id - b.m_id;
+	}
+	
+	public static Box trim(Box b)
+	{
+		Set<Integer> to_include = new HashSet<Integer>();
+		visit(b, to_include);
+		return copy(b, to_include);
+	}
+
+	protected static void visit(Box current, Set<Integer> to_include)
+	{
+		if (current.isAltered())
+		{
+			propagate(current, to_include);
+		}
+		for (Box child : current.getChildren())
+		{
+			visit(child, to_include);
+		}
+	}
+
+	protected static void propagate(Box current, Set<Integer> to_include)
+	{
+		Box parent = current.getParent();
+		if (parent == null)
+		{
+			to_include.add(current.getId());
+			return;
+		}
+		for (Box sibling : parent.getChildren())
+		{
+			to_include.add(sibling.getId());
+		}
+		propagate(parent, to_include);
+	}
+
+	protected static Box copy(Box current, Set<Integer> to_include) 
+	{
+		if (!to_include.contains(current.getId()))
+		{
+			return null;
+		}
+		Box current_copy = new Box(current.getId(), current.getX(), current.getY(), current.getWidth(), current.getHeight());
+		current_copy.setPadding(current.getPadding());
+		if (current.isAltered())
+		{
+			current_copy.alter();
+		}
+		for (Box child : current.getChildren())
+		{
+			Box child_copy = copy(child, to_include);
+			if (child_copy != null)
+			{
+				current_copy.addChild(child_copy);
+			}
+		}
+		return current_copy;
 	}
 }

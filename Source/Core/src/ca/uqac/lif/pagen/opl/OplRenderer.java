@@ -28,21 +28,36 @@ import ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
 import ca.uqac.lif.pagen.LayoutConstraint.HorizontallyAligned;
 import ca.uqac.lif.pagen.LayoutConstraint.VerticallyAligned;
 
+/**
+ * A renderer that prints a page as set of real variables and linear
+ * constraints, in the output format of the CPLEX solver.
+ */
 public abstract class OplRenderer extends BoxRenderer
 {
 	/**
 	 * A set of constraints that applies to some of the boxes. 
 	 */
-	protected Set<LayoutConstraint> m_constraints;
+	/*@ non_null @*/ protected Set<LayoutConstraint> m_constraints;
+	
+	/**
+	 * The number of variables resulting from the modeling of the page and
+	 * its constraints.
+	 */
+	protected int m_numVariables;
+	
+	/**
+	 * The number of distinct constraints produced by the renderer.
+	 */
+	protected int m_numConstraints;
 	
 	@SafeVarargs
 	public OplRenderer(Set<LayoutConstraint> ... constraints)
 	{
 		super();
 		m_constraints = new HashSet<LayoutConstraint>();
-		for (Set<LayoutConstraint> set : constraints)
+		for (Set<LayoutConstraint> c : constraints)
 		{
-			m_constraints.addAll(set);
+			m_constraints.addAll(c);
 		}
 	}
 	
@@ -57,7 +72,13 @@ public abstract class OplRenderer extends BoxRenderer
 		return this;
 	}
 	
-	protected void render(PrintStream ps, LayoutConstraint c)
+	/**
+	 * Renders a layout constraint. This method simply dispatches the control to
+	 * another method depending on the type of layout constraint to be rendered.
+	 * @param ps The print stream where the constraint is to be printed
+	 * @param c The constraint
+	 */
+	protected void render(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ LayoutConstraint c)
 	{
 		if (c instanceof VerticallyAligned)
 		{
@@ -77,12 +98,50 @@ public abstract class OplRenderer extends BoxRenderer
 		}
 	}
 	
-	protected abstract void renderVerticallyAligned(PrintStream ps, VerticallyAligned c);
+	/**
+	 * Gets the count of variables resulting from the modeling of the page and
+	 * its constraints.
+	 * @return The number of variables
+	 */
+	/*@ pure @*/ public int getVariableCount()
+	{
+		return m_numVariables;
+	}
 	
-	protected abstract void renderHorizontallyAligned(PrintStream ps, HorizontallyAligned c);
+	/**
+	 * Gets the number of distinct constraints produced by the renderer.
+	 * @return The number of constraints
+	 */
+	/*@ pure @*/ public int getConstraintCount()
+	{
+		return m_numConstraints;
+	}
 	
-	protected abstract void renderDisjoint(PrintStream ps, Disjoint c);
+	/**
+	 * Renders a vertically-aligned layout constraint.
+	 * @param ps The print stream where the constraint is to be printed
+	 * @param c The constraint
+	 */
+	protected abstract void renderVerticallyAligned(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ VerticallyAligned c);
 	
-	protected abstract void renderContained(PrintStream ps, Contained c);
-
+	/**
+	 * Renders a horizontally-aligned layout constraint.
+	 * @param ps The print stream where the constraint is to be printed
+	 * @param c The constraint
+	 */
+	protected abstract void renderHorizontallyAligned(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ HorizontallyAligned c);
+	
+	/**
+	 * Renders a disjointness layout constraint.
+	 * @param ps The print stream where the constraint is to be printed
+	 * @param c The constraint
+	 */
+	protected abstract void renderDisjoint(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ Disjoint c);
+	
+	/**
+	 * Renders a containment layout constraint.
+	 * @param ps The print stream where the constraint is to be printed
+	 * @param c The constraint
+	 */
+	protected abstract void renderContained(/*@ non_null @*/ PrintStream ps, /*@ non_null @*/ Contained c);
 }

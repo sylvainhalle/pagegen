@@ -37,6 +37,13 @@ public interface LayoutManager
 	public Set<LayoutConstraint> getConstraints();
 	
 	/**
+	 * Gets the set of constraints that are purposefully violated by the
+	 * operation of this layout manager
+	 * @return The set of violated layout constraints
+	 */
+	public Set<LayoutConstraint> getViolatedConstraints();
+	
+	/**
 	 * Gets the set of box dependencies accumulated by the operation of this
 	 * layout manager
 	 * @return The set of box dependencies

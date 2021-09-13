@@ -53,6 +53,7 @@ public class OplAbsoluteRenderer extends OplRenderer
 	{
 		Map<Integer,Box> boxes = b.flatten();
 		int size = boxes.size();
+		m_numVariables = size * 4;
 		// Box IDs are put in a list so that we can always enumerate them
 		// in the same order
 		List<Integer> box_ids = new ArrayList<Integer>(size);
@@ -62,6 +63,7 @@ public class OplAbsoluteRenderer extends OplRenderer
 		ps.println(" * OPL 12.10.0.0 Model");
 		ps.println(" * Tree size:             " + b.getSize());
 		ps.println(" * Tree depth:            " + b.getDepth());
+		ps.println(" * Absolute modeling");
 		ps.println("****************************************/");
 		ps.println("int nb_rectangles=" + size + ";");
 		ps.print("{int} rectangles_id={");
@@ -213,6 +215,7 @@ public class OplAbsoluteRenderer extends OplRenderer
 		for (Box b : boxes)
 		{
 			ps.println("top[" + first.getId() + "]==top[" + b.getId() + "];");
+			m_numConstraints++;
 		}
 	}
 
@@ -239,6 +242,7 @@ public class OplAbsoluteRenderer extends OplRenderer
 		for (Box b : boxes)
 		{
 			ps.println("left[" + first.getId() + "]==left[" + b.getId() + "];");
+			m_numConstraints++;
 		}
 	}
 
@@ -251,6 +255,7 @@ public class OplAbsoluteRenderer extends OplRenderer
 		ps.print("top[" + b2_id + "]+Height[" + b2_id + "]<= top[" + b1_id + "] || ");
 		ps.print("left[" + b1_id + "]+Width[" + b1_id + "]<= left[" + b2_id + "] || ");
 		ps.print("left[" + b2_id + "]+Width[" + b2_id + "]<= left[" + b1_id + "];\n");
+		m_numConstraints++;
 	}
 
 	@Override
@@ -262,5 +267,6 @@ public class OplAbsoluteRenderer extends OplRenderer
 		ps.print("top[" + b1_id + "]+Height[" + b1_id + "]>= top[" + b2_id + "]+Height[" + b2_id + "];");
 		ps.print("left[" + b1_id + "]<=left[" + b2_id + "];");
 		ps.print("left[" + b1_id + "]+Width[" + b1_id + "]>= left[" + b2_id + "]+Width[" + b2_id + "];\n");
+		m_numConstraints += 4;
 	}
 }

@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import ca.uqac.lif.pagen.CliParser.Argument;
 import ca.uqac.lif.pagen.CliParser.ArgumentMap;
@@ -173,9 +175,16 @@ public class Main
 		}
 		else if (type.compareToIgnoreCase("opl") == 0)
 		{
+			Set<LayoutConstraint> constraints = new HashSet<LayoutConstraint>();
+			Set<LayoutConstraint> violated = new HashSet<LayoutConstraint>();
+			constraints.addAll(hfl_1.getConstraints());
+			constraints.addAll(hfl_2.getConstraints());
+			constraints.addAll(vfl_1.getConstraints());
+			constraints.addAll(Contained.addContainmentConstraints(b));
+			constraints.addAll(Disjoint.addContainmentConstraints(b));
 			if (arg_map.hasOption("relative"))
 			{
-				renderer = new OplRelativeRenderer(hfl_1.getConstraints(), hfl_2.getConstraints(), vfl_1.getConstraints(), Contained.addContainmentConstraints(b), Disjoint.addContainmentConstraints(b));
+				renderer = new OplRelativeRenderer(constraints);
 				BoxDependencyGraph g = new BoxDependencyGraph();
 				if (!arg_map.hasOption("flat"))
 				{

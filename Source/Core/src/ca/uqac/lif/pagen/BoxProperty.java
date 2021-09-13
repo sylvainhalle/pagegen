@@ -92,6 +92,23 @@ public class BoxProperty implements Comparable<BoxProperty>
 		}
 	}
 	
+	/*@ pure non_null @*/ public BoxProperty getAbsolute()
+	{
+		switch (m_property)
+		{
+		case DX:
+			return get(m_box, Property.X);
+		case DY:
+			return get(m_box, Property.Y);
+		case DH:
+			return get(m_box, Property.H);
+		case DW:
+			return get(m_box, Property.W);
+		default:
+			return this;
+		}
+	}
+	
 	/*@ pure non_null @*/ public Box getBox()
 	{
 		return m_box;
