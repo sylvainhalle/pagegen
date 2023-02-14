@@ -19,10 +19,6 @@ package ca.uqac.lif.pagen;
 
 import org.junit.Test;
 
-import ca.uqac.lif.pagen.Box;
-import ca.uqac.lif.pagen.BoxDependencyGraph;
-import ca.uqac.lif.pagen.BoxProperty;
-
 import static ca.uqac.lif.pagen.BoxProperty.Property.DW;
 import static ca.uqac.lif.pagen.BoxProperty.Property.DX;
 import static ca.uqac.lif.pagen.BoxProperty.Property.W;

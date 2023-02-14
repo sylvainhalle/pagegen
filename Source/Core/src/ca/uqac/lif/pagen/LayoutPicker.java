@@ -1,6 +1,6 @@
 /*
     A random DOM tree generator
-    Copyright (C) 2020 Sylvain Hallé
+    Copyright (C) 2020-2023 Sylvain Hallé
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published
@@ -18,9 +18,9 @@
 package ca.uqac.lif.pagen;
 
 import ca.uqac.lif.synthia.Picker;
-import ca.uqac.lif.synthia.util.ElementPicker;
+import ca.uqac.lif.synthia.util.Choice;
 
-public class LayoutPicker extends ElementPicker<LayoutManager>
+public class LayoutPicker extends Choice<LayoutManager>
 {
 	public LayoutPicker(Picker<Float> picker)
 	{

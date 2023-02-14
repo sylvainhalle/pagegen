@@ -18,7 +18,6 @@
 package ca.uqac.lif.pagen.opl;
 
 import static ca.uqac.lif.pagen.BoxProperty.Property.X;
-import static ca.uqac.lif.pagen.BoxProperty.Property.Y;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -31,10 +30,8 @@ import ca.uqac.lif.pagen.Box;
 import ca.uqac.lif.pagen.BoxDependencyGraph;
 import ca.uqac.lif.pagen.LayoutConstraint;
 
-import static ca.uqac.lif.pagen.LayoutConstraint.Contained;
 import static ca.uqac.lif.pagen.LayoutConstraint.Disjoint;
 import static ca.uqac.lif.pagen.LayoutConstraint.SameX;
-import static ca.uqac.lif.pagen.LayoutConstraint.SameY;
 
 public class OplRelativeRendererTest
 {

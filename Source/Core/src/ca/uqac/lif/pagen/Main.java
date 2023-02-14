@@ -1,6 +1,6 @@
 /*
     A random DOM tree generator
-    Copyright (C) 2020-2021 Sylvain Hallé
+    Copyright (C) 2020-2023 Sylvain Hallé
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published
@@ -32,11 +32,10 @@ import ca.uqac.lif.pagen.opl.DependencyGraphRenderer;
 import ca.uqac.lif.pagen.opl.OplAbsoluteRenderer;
 import ca.uqac.lif.pagen.opl.OplRelativeRenderer;
 import ca.uqac.lif.synthia.Picker;
-import ca.uqac.lif.synthia.random.RandomIntervalFloat;
-import ca.uqac.lif.synthia.util.ElementPicker;
+import ca.uqac.lif.synthia.random.RandomFloat;
+import ca.uqac.lif.synthia.util.Choice;
 import ca.uqac.lif.synthia.random.PoissonInteger;
 import ca.uqac.lif.synthia.random.RandomBoolean;
-import ca.uqac.lif.synthia.random.RandomFloat;
 import ca.uqac.lif.synthia.random.RandomInteger;
 
 public class Main 
@@ -110,8 +109,8 @@ public class Main
 		// Initialize RNGs and seed
 		RandomInteger depth = new RandomInteger(min_depth, max_depth); // 6-22
 		PoissonInteger degree = new PoissonInteger(p_degree);
-		RandomIntervalFloat width = new RandomIntervalFloat(5, 20);
-		RandomIntervalFloat height = new RandomIntervalFloat(5, 10);
+		RandomFloat width = new RandomFloat(5, 20);
+		RandomFloat height = new RandomFloat(5, 10);
 		RandomFloat float_source = new RandomFloat();
 		RandomInteger row_size = new RandomInteger(0, 10);
 		RandomInteger column_size = new RandomInteger(0, 10);
@@ -121,7 +120,7 @@ public class Main
 		RandomInteger overlap_shift = new RandomInteger(2, 10);
 		RandomBoolean overflow = new RandomBoolean(p_overflow);
 		RandomInteger overflow_shift = new RandomInteger(2, 10);
-		ElementPicker<LayoutManager> layout = new ElementPicker<LayoutManager>(float_source);
+		Choice<LayoutManager> layout = new Choice<LayoutManager>(float_source);
 		RandomInteger rand_color = new RandomInteger(128,255);
 		Picker<String> color = new ColorPicker(rand_color);
 		if (seed >= 0)

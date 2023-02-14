@@ -53,7 +53,7 @@
       <name>Synthia</name>
       <classname>ca.uqac.lif.synthia.Picker</classname>
       <files>
-        <zip>https://github.com/liflab/synthia/releases/download/v0.2/synthia-0.2.zip</zip>
+        <jar>https://github.com/liflab/synthia/releases/download/v0.3.1/synthia-core.jar</jar>
       </files>
       <!-- The following parameter is mandatory. Set it to false if you don't
            want this library to be bundled into the compiled JAR. -->
